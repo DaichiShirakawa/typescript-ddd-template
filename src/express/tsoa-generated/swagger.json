@@ -1,0 +1,439 @@
+{
+	"components": {
+		"examples": {},
+		"headers": {},
+		"parameters": {},
+		"requestBodies": {},
+		"responses": {},
+		"schemas": {
+			"Facility": {
+				"description": "テナントに属する施設",
+				"properties": {
+					"_instanceSeq": {
+						"type": "number",
+						"format": "double",
+						"description": "プロセスに内で生成されたモデルの番号"
+					},
+					"tenantId": {
+						"type": "string"
+					},
+					"id": {
+						"type": "string"
+					},
+					"name": {
+						"type": "string"
+					},
+					"createdAt": {
+						"type": "string",
+						"format": "date-time"
+					},
+					"updatedAt": {
+						"type": "string",
+						"format": "date-time"
+					},
+					"tenant": {
+						"$ref": "#/components/schemas/Tenant"
+					}
+				},
+				"required": [
+					"_instanceSeq",
+					"tenantId",
+					"name",
+					"createdAt",
+					"updatedAt",
+					"tenant"
+				],
+				"type": "object",
+				"additionalProperties": false
+			},
+			"Tenant": {
+				"description": "テナント(お客様組織)",
+				"properties": {
+					"_instanceSeq": {
+						"type": "number",
+						"format": "double",
+						"description": "プロセスに内で生成されたモデルの番号"
+					},
+					"tenantId": {
+						"type": "string"
+					},
+					"name": {
+						"type": "string",
+						"description": "コンソールなどでも表示される、エンドユーザーが認識しやすい名称\n例: \"株式会社しらかわ\""
+					},
+					"code": {
+						"type": "string",
+						"description": "URLの一部などに利用される、開発者が認識しやすい名称\n例: \"srkw\""
+					},
+					"createdAt": {
+						"type": "string",
+						"format": "date-time"
+					},
+					"updatedAt": {
+						"type": "string",
+						"format": "date-time"
+					},
+					"facilities": {
+						"items": {
+							"$ref": "#/components/schemas/Facility"
+						},
+						"type": "array"
+					}
+				},
+				"required": [
+					"_instanceSeq",
+					"tenantId",
+					"name",
+					"code",
+					"createdAt",
+					"updatedAt",
+					"facilities"
+				],
+				"type": "object",
+				"additionalProperties": false
+			},
+			"Pick_Facility.name_": {
+				"properties": {
+					"name": {
+						"type": "string"
+					}
+				},
+				"required": [
+					"name"
+				],
+				"type": "object",
+				"description": "From T, pick a set of properties whose keys are in the union K"
+			},
+			"RegisterFacilityReq": {
+				"$ref": "#/components/schemas/Pick_Facility.name_"
+			},
+			"Pick_Tenant.name-or-code_": {
+				"properties": {
+					"name": {
+						"type": "string",
+						"description": "コンソールなどでも表示される、エンドユーザーが認識しやすい名称\n例: \"株式会社しらかわ\""
+					},
+					"code": {
+						"type": "string",
+						"description": "URLの一部などに利用される、開発者が認識しやすい名称\n例: \"srkw\""
+					}
+				},
+				"required": [
+					"name",
+					"code"
+				],
+				"type": "object",
+				"description": "From T, pick a set of properties whose keys are in the union K"
+			},
+			"RegisterTenantReq": {
+				"$ref": "#/components/schemas/Pick_Tenant.name-or-code_"
+			}
+		},
+		"securitySchemes": {
+			"TENANT": {
+				"type": "apiKey",
+				"name": "x-tenant-id",
+				"in": "header",
+				"description": "とりあえずテナントIDをつっこむ。本格的なセキュリティはこんど考える"
+			}
+		}
+	},
+	"info": {
+		"title": ""
+	},
+	"openapi": "3.0.0",
+	"paths": {
+		"/tenants/{tenantId}/facilities": {
+			"post": {
+				"operationId": "RegisterFacilityGMO",
+				"responses": {
+					"200": {
+						"description": "Ok",
+						"content": {
+							"application/json": {
+								"schema": {
+									"$ref": "#/components/schemas/Facility"
+								}
+							}
+						}
+					}
+				},
+				"tags": [
+					"02: Facility"
+				],
+				"security": [
+					{
+						"CONSOLE_TENANT": []
+					}
+				],
+				"parameters": [
+					{
+						"in": "path",
+						"name": "tenantId",
+						"required": true,
+						"schema": {
+							"type": "string"
+						}
+					}
+				],
+				"requestBody": {
+					"required": true,
+					"content": {
+						"application/json": {
+							"schema": {
+								"$ref": "#/components/schemas/RegisterFacilityReq"
+							}
+						}
+					}
+				}
+			}
+		},
+		"/tenants/{tenantId}/facilities/{tenantId}/facilities": {
+			"get": {
+				"operationId": "ListFacilities",
+				"responses": {
+					"200": {
+						"description": "Ok",
+						"content": {
+							"application/json": {
+								"schema": {
+									"items": {
+										"$ref": "#/components/schemas/Facility"
+									},
+									"type": "array"
+								}
+							}
+						}
+					}
+				},
+				"tags": [
+					"02: Facility"
+				],
+				"security": [
+					{
+						"CONSOLE_TENANT": []
+					}
+				],
+				"parameters": [
+					{
+						"in": "path",
+						"name": "tenantId",
+						"required": true,
+						"schema": {
+							"type": "string"
+						}
+					}
+				]
+			}
+		},
+		"/tenants": {
+			"post": {
+				"operationId": "Register",
+				"responses": {
+					"200": {
+						"description": "Ok",
+						"content": {
+							"application/json": {
+								"schema": {
+									"$ref": "#/components/schemas/Tenant"
+								}
+							}
+						}
+					}
+				},
+				"tags": [
+					"01: Tenant"
+				],
+				"security": [
+					{
+						"CONSOLE": []
+					}
+				],
+				"parameters": [],
+				"requestBody": {
+					"required": true,
+					"content": {
+						"application/json": {
+							"schema": {
+								"$ref": "#/components/schemas/RegisterTenantReq"
+							}
+						}
+					}
+				}
+			},
+			"get": {
+				"operationId": "List",
+				"responses": {
+					"200": {
+						"description": "Ok",
+						"content": {
+							"application/json": {
+								"schema": {
+									"items": {
+										"$ref": "#/components/schemas/Tenant"
+									},
+									"type": "array"
+								}
+							}
+						}
+					}
+				},
+				"tags": [
+					"01: Tenant"
+				],
+				"security": [
+					{
+						"CONSOLE": []
+					}
+				],
+				"parameters": []
+			}
+		},
+		"/tenants/{tenantId}": {
+			"get": {
+				"operationId": "Find",
+				"responses": {
+					"200": {
+						"description": "Ok",
+						"content": {
+							"application/json": {
+								"schema": {
+									"$ref": "#/components/schemas/Tenant"
+								}
+							}
+						}
+					}
+				},
+				"tags": [
+					"01: Tenant"
+				],
+				"security": [
+					{
+						"CONSOLE_TENANT": []
+					}
+				],
+				"parameters": [
+					{
+						"in": "path",
+						"name": "tenantId",
+						"required": true,
+						"schema": {
+							"type": "string"
+						}
+					}
+				]
+			}
+		},
+		"/tenants/{tenantId}/name": {
+			"patch": {
+				"operationId": "UpdateName",
+				"responses": {
+					"200": {
+						"description": "Ok",
+						"content": {
+							"application/json": {
+								"schema": {
+									"$ref": "#/components/schemas/Tenant"
+								}
+							}
+						}
+					}
+				},
+				"tags": [
+					"01: Tenant"
+				],
+				"security": [
+					{
+						"CONSOLE_TENANT": []
+					}
+				],
+				"parameters": [
+					{
+						"in": "path",
+						"name": "tenantId",
+						"required": true,
+						"schema": {
+							"type": "string"
+						}
+					}
+				],
+				"requestBody": {
+					"required": true,
+					"content": {
+						"application/json": {
+							"schema": {
+								"properties": {
+									"name": {
+										"type": "string"
+									}
+								},
+								"required": [
+									"name"
+								],
+								"type": "object"
+							}
+						}
+					}
+				}
+			}
+		},
+		"/tenants/{tenantId}/code": {
+			"patch": {
+				"operationId": "UpdateCode",
+				"responses": {
+					"200": {
+						"description": "Ok",
+						"content": {
+							"application/json": {
+								"schema": {
+									"$ref": "#/components/schemas/Tenant"
+								}
+							}
+						}
+					}
+				},
+				"tags": [
+					"01: Tenant"
+				],
+				"security": [
+					{
+						"CONSOLE_TENANT": []
+					}
+				],
+				"parameters": [
+					{
+						"in": "path",
+						"name": "tenantId",
+						"required": true,
+						"schema": {
+							"type": "string"
+						}
+					}
+				],
+				"requestBody": {
+					"required": true,
+					"content": {
+						"application/json": {
+							"schema": {
+								"properties": {
+									"code": {
+										"type": "string"
+									}
+								},
+								"required": [
+									"code"
+								],
+								"type": "object"
+							}
+						}
+					}
+				}
+			}
+		}
+	},
+	"servers": [
+		{
+			"url": "http://localhost:8080/api/v1"
+		}
+	]
+}

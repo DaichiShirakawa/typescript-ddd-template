@@ -1,0 +1,7 @@
+{
+  "god.tsconfig": "./tsconfig.json",
+  "npm.includeDirectories": ["console", "server-renewal"],
+  "debug.javascript.autoAttachFilter": "onlyWithFlag",
+  "editor.formatOnSave": true,
+  "cSpell.words": ["Middlewares", "tsoa", "typeorm"]
+}
