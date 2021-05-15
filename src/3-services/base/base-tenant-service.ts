@@ -24,22 +24,39 @@ export abstract class BaseTenantService extends BaseService<TenantContext> {
   }
 
   /**
-   * テナントに属しないデータへもアクセスできる Transaction を返します
+   * Tenant に属するデータのみ読み書きできるよう、拡張された Transaction
    * @see {Transaction}
    */
-  protected transactionDANGER<R>(func: TxProcessor<R>): Promise<R> {
-    return BaseService.START_TX(this, func as any);
+  protected transaction<R>(func: TxProcessor<R>): Promise<R> {
+    return BaseTenantService.START_TX(this, func as any);
   }
 
   /**
-   * 保存処理が発生しない場合にのみ使ってください。
+   * 読み込み専用 Transaction
+   */
+  protected findTransaction<R>(
+    func: (tx: Transaction) => R | Promise<R>
+  ): Promise<R> {
+    return BaseTenantService.START_READONLY_TX(this, async (tx) => ({
+      returns: () => func(tx as any),
+      saveModels: [],
+    }));
+  }
+
+  /**
+   * テナントに属しないデータへもアクセスできる Transaction
+   * @see {Transaction}
+   */
+  protected transactionDANGER<R>(func: TxProcessor<R>): Promise<R> {
+    return super.transaction(func);
+  }
+
+  /**
+   * テナントに属しないデータへもアクセスできる読み込み専用 Transaction
    */
   protected findTransactionDANGER<R>(
     func: (tx: Transaction) => R | Promise<R>
   ): Promise<R> {
-    return BaseService.START_READONLY_TX(this, async (tx) => ({
-      returns: () => func(tx as any),
-      saveModels: [],
-    }));
+    return super.findTransaction(func);
   }
 }
