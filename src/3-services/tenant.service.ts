@@ -2,7 +2,7 @@ import { getConnection } from "typeorm";
 import { Tenant } from "../1-entities/tenant.entity";
 import { TenantModel } from "../2-models/tenant.model";
 import { HttpsError } from "../express/https-error";
-import { ContextHolder } from "../express/security/base-context";
+import { ContextHolder } from "../express/context/base-context";
 import { BaseTenantService } from "./base/base-tenant-service";
 
 export class TenantService extends BaseTenantService {

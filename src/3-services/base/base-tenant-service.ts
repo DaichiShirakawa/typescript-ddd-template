@@ -1,5 +1,5 @@
 import { Tenant } from "../../1-entities/tenant.entity";
-import { TenantContext } from "../../express/security/tenant-context";
+import { TenantContext } from "../../express/context/tenant-context";
 import { BaseService } from "./base-service";
 import { TxStarter, TxProcessor, Transaction } from "./transaction";
 

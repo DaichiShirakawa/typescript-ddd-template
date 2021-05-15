@@ -2,8 +2,8 @@ import { getConnection } from "typeorm";
 import { MyBaseEntity } from "../1-entities/base/base-entity";
 import { TxProcessor, TxStarter } from "../3-services/base/transaction";
 import { HttpsError } from "../express/https-error";
-import { ContextHolder } from "../express/security/base-context";
-import { TenantContext } from "../express/security/tenant-context";
+import { ContextHolder } from "../express/context/base-context";
+import { TenantContext } from "../express/context/tenant-context";
 import { TenantTransaction } from "./tenant-transaction";
 
 /**

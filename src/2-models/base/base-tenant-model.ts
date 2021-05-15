@@ -1,7 +1,7 @@
 import { HttpsError } from "../../express/https-error";
-import { ContextHolder } from "../../express/security/base-context";
+import { ContextHolder } from "../../express/context/base-context";
 import { BaseModel, ModelDependencies } from "./base-model";
-import { TenantContext } from "../../express/security/tenant-context";
+import { TenantContext } from "../../express/context/tenant-context";
 import { ModelHelper } from "./model-helper";
 import { Tenant } from "../../1-entities/tenant.entity";
 

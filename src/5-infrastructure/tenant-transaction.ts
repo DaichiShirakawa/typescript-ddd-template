@@ -8,8 +8,8 @@ import {
 } from "typeorm";
 import { MyBaseEntity } from "../1-entities/base/base-entity";
 import { HttpsError } from "../express/https-error";
-import { ContextHolder } from "../express/security/base-context";
-import { TenantContext } from "../express/security/tenant-context";
+import { ContextHolder } from "../express/context/base-context";
+import { TenantContext } from "../express/context/tenant-context";
 import { AllTransaction } from "./all-transaction";
 import { TransactionHelper } from "./transaction-helper";
 import { BaseTenantEntity } from "../1-entities/base/base-tenant-entity";

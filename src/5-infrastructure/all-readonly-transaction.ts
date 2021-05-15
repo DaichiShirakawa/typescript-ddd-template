@@ -2,7 +2,7 @@ import { getConnection } from "typeorm";
 import { MyBaseEntity } from "../1-entities/base/base-entity";
 import { TxProcessor, TxStarter } from "../3-services/base/transaction";
 import { HttpsError } from "../express/https-error";
-import { ContextHolder } from "../express/security/base-context";
+import { ContextHolder } from "../express/context/base-context";
 import { AllTransaction } from "./all-transaction";
 import { TenantReadonlyTransaction } from "./tenant-readonly-transaction";
 

@@ -1,10 +1,10 @@
 import { Request } from "express";
-import { ContextHolder } from "./base-context";
+import { ContextHolder } from "../context/base-context";
 import { Securities } from "./securities";
 import { getRepository } from "typeorm";
 import { Tenant } from "../../1-entities/tenant.entity";
-import { TenantContext } from "./tenant-context";
-import { APIContext } from "./api-context";
+import { TenantContext } from "../context/tenant-context";
+import { APIContext } from "../context/api-context";
 
 export interface ConsoleReq extends ContextHolder<APIContext> {}
 export interface ConsoleTenantReq extends ContextHolder<TenantContext> {}

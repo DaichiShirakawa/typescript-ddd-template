@@ -8,7 +8,7 @@ import {
   TxProcessor,
 } from "../3-services/base/transaction";
 import { HttpsError } from "../express/https-error";
-import { Context, ContextHolder } from "../express/security/base-context";
+import { Context, ContextHolder } from "../express/context/base-context";
 
 export class TransactionHelper {
   /**

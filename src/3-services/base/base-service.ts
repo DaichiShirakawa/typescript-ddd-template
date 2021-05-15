@@ -1,4 +1,4 @@
-import { Context, ContextHolder } from "../../express/security/base-context";
+import { Context, ContextHolder } from "../../express/context/base-context";
 import { Transaction, TxProcessor, TxStarter } from "./transaction";
 
 /**

@@ -1,5 +1,5 @@
 import { MyBaseEntity } from "../../1-entities/base/base-entity";
-import { Context, ContextHolder } from "../../express/security/base-context";
+import { Context, ContextHolder } from "../../express/context/base-context";
 import { HttpsError } from "../../express/https-error";
 
 export type ModelDependencies = {

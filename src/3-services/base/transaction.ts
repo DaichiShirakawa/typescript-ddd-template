@@ -1,7 +1,7 @@
 import { EntityTarget, FindManyOptions } from "typeorm";
 import { MyBaseEntity } from "../../1-entities/base/base-entity";
 import { BaseModel } from "../../2-models/base/base-model";
-import { Context, ContextHolder } from "../../express/security/base-context";
+import { Context, ContextHolder } from "../../express/context/base-context";
 
 export type TxProcessor<R = undefined> = (tx: Transaction) => Promise<{
   /**

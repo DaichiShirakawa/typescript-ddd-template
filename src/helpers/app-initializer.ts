@@ -5,13 +5,13 @@ import { TxProcessor } from "../3-services/base/transaction";
 import { TenantService } from "../3-services/tenant.service";
 import { AllTransaction } from "../5-infrastructure/all-transaction";
 import { TransactionHelper } from "../5-infrastructure/transaction-helper";
-import { ContextHolder } from "../express/security/base-context";
+import { ContextHolder } from "../express/context/base-context";
 import * as ENTITIES from "./entities-index";
 import "./env-def";
 import { AllReadonlyTransaction } from "../5-infrastructure/all-readonly-transaction";
 import { TenantTransaction } from "../5-infrastructure/tenant-transaction";
 import { TenantReadonlyTransaction } from "../5-infrastructure/tenant-readonly-transaction";
-import { TenantContext } from "../express/security/tenant-context";
+import { TenantContext } from "../express/context/tenant-context";
 
 export async function initializeApp() {
   TenantService.initialize(

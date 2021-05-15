@@ -1,7 +1,7 @@
 import { Facility } from "../1-entities/facility.entity";
-import { ContextHolder } from "../express/security/base-context";
+import { ContextHolder } from "../express/context/base-context";
 import { BaseTenantModel } from "./base/base-tenant-model";
-import { TenantContext } from "../express/security/tenant-context";
+import { TenantContext } from "../express/context/tenant-context";
 
 type D = { facility: Facility };
 

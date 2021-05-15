@@ -1,7 +1,7 @@
 import { PrimaryColumn } from "typeorm";
-import { ContextHolder } from "../../express/security/base-context";
+import { ContextHolder } from "../../express/context/base-context";
 import { MyBaseEntity } from "./base-entity";
-import { TenantContext } from "../../express/security/tenant-context";
+import { TenantContext } from "../../express/context/tenant-context";
 
 /**
  * テナントに属するすべてのデータはこれを継承します。
