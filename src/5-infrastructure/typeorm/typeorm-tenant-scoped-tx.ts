@@ -6,16 +6,11 @@ import {
   getRepository,
   ObjectLiteral,
 } from "typeorm";
+import { HttpsError } from "../../0-definitions/https-error";
 import { MyBaseEntity } from "../../1-entities/base/base-entity";
 import { TenantScopedEntity } from "../../1-entities/base/tenant-scoped-entity";
-import {
-  TenantContext,
-  TenantContextHolder,
-} from "../../2-models/base/tenant-context";
-import { TxProcessor } from "../../3-services/base/transaction";
-import { HttpsError } from "../../0-definitions/https-error";
+import { TenantContext } from "../../2-models/base/tenant-context";
 import { TypeORMTx } from "./typeorm-tx";
-import { TypeORMHelper } from "./typeorm-helper";
 
 /**
  * TypeORM のトランザクション(EntityManager) をテナントコンテキストに合わせて拡張した Transaction です。
