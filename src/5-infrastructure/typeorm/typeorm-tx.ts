@@ -1,16 +1,14 @@
 import { EntityManager, EntityTarget, FindManyOptions } from "typeorm";
-import { MyBaseEntity } from "../1-entities/base/base-entity";
-import { EntityHelper } from "../1-entities/base/entity-helper";
+import { MyBaseEntity } from "../../1-entities/base/base-entity";
 import {
   SavedTarget,
   SaveTarget,
   Transaction,
   TxProcessor,
-  TxStarter,
-} from "../3-services/base/transaction";
-import { HttpsError } from "../express/https-error";
-import { Context, ContextHolder } from "../express/context/base-context";
-import { TransactionHelper } from "./transaction-helper";
+} from "../../3-services/base/transaction";
+import { HttpsError } from "../../0-definitions/https-error";
+import { Context, ContextHolder } from "../../0-definitions/context";
+import { TypeORMHelper } from "./typeorm-helper";
 
 /**
  * TypeORM のトランザクション(EntityManager) を拡張した Transaction です。
@@ -19,9 +17,7 @@ import { TransactionHelper } from "./transaction-helper";
  * - insert/update 後に最新データを select して返すなど、拡張されています
  * - セーブ対象のモデルが持つサブモデルも含めすべてのentityをセーブするなどできます
  */
-export class AllTransaction<C extends Context = Context>
-  implements Transaction<C>
-{
+export class TypeORMTx<C extends Context = Context> implements Transaction<C> {
   readonly context: C;
   protected readonly tx: EntityManager;
 
@@ -30,19 +26,14 @@ export class AllTransaction<C extends Context = Context>
     this.context = ch.context;
   }
 
-  static get starter(): TxStarter<any> {
-    return (ch: ContextHolder, func: TxProcessor<AllTransaction>) =>
-      TransactionHelper.start(AllTransaction, ch, func);
-  }
-
   /**
    * insert した後、最新のデータを select して返します
    */
   async insert<T extends MyBaseEntity>(entity: T): Promise<T> {
-    const saveEntity = EntityHelper.asSaveEntity(entity);
+    const saveEntity = TypeORMHelper.asSaveEntity(entity);
     await this.tx.insert(entity.constructor, saveEntity);
     return await this.tx.findOneOrFail(entity.constructor, {
-      where: TransactionHelper.toPrimaryWhere(entity),
+      where: TypeORMHelper.toPrimaryWhere(entity),
     });
   }
 
@@ -50,8 +41,8 @@ export class AllTransaction<C extends Context = Context>
    * update した後、最新のデータを select して返します
    */
   async update<T extends MyBaseEntity>(entity: T): Promise<T> {
-    const saveEntity = EntityHelper.asSaveEntity(entity);
-    const where = TransactionHelper.toPrimaryWhere(entity);
+    const saveEntity = TypeORMHelper.asSaveEntity(entity);
+    const where = TypeORMHelper.toPrimaryWhere(entity);
     await this.tx.update(entity.constructor, where, saveEntity);
     return await this.tx.findOneOrFail(entity.constructor, { where });
   }
@@ -96,7 +87,7 @@ export class AllTransaction<C extends Context = Context>
     );
 
     for (const target of savedTargets) {
-      if (target.entity.isNeedInsert) {
+      if (target.entity.isNewEntity) {
         target.savedEntity = await this.insert(target.entity);
       } else {
         target.savedEntity = await this.update(target.entity);

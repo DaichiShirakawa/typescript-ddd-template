@@ -1,6 +1,6 @@
 import { DateTime } from "luxon";
 
-export class TestUtils {
+export class TestHelper {
   static timeKey(prefix: string = "") {
     prefix = prefix ? prefix + "_" : prefix;
     return prefix + DateTime.now().toFormat("yyyyMMddHHmmss");

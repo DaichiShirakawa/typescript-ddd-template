@@ -1,6 +1,5 @@
-import { APIHelper } from "../helpers/api-helper";
 /**
- * Marupakuri from:
+ * Respect for:
  * https://github.com/firebase/firebase-functions/blob/98bf467aa436f7e27969a8ad3887abe0345f66d3/src/providers/https.ts
  */
 
@@ -117,7 +116,7 @@ export class HttpsError extends Error {
     }
 
     this.code = code;
-    this.details = APIHelper.convertFrontEntityRecursively(details);
+    this.details = details;
     this.httpErrorCode = errorCodeMap[code];
   }
 

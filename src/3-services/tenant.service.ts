@@ -1,17 +1,17 @@
 import { getConnection } from "typeorm";
 import { Tenant } from "../1-entities/tenant.entity";
 import { TenantModel } from "../2-models/tenant.model";
-import { HttpsError } from "../express/https-error";
-import { ContextHolder } from "../express/context/base-context";
+import { HttpsError } from "../0-definitions/https-error";
+import { ContextHolder } from "../0-definitions/context";
 import { BaseTenantService } from "./base/base-tenant-service";
 
 export class TenantService extends BaseTenantService {
   list(): Promise<Tenant[]> {
-    return this.findTransactionDANGER((tx) => tx.find(Tenant));
+    return this.startReadonlyTxDANGER((tx) => tx.find(Tenant));
   }
 
   find(tenantId: string): Promise<Tenant> {
-    return this.findTransactionDANGER((tx) =>
+    return this.startReadonlyTxDANGER((tx) =>
       tx.findOneOrFail(Tenant, tenantId)
     );
   }
@@ -42,7 +42,7 @@ export class TenantService extends BaseTenantService {
   }
 
   updateName(name: string): Promise<Tenant> {
-    return this.transaction(async (tx) => {
+    return this.startTx(async (tx) => {
       const model = new TenantModel(this).updateName(name);
       return {
         returns: () => model.tenant,
@@ -52,14 +52,14 @@ export class TenantService extends BaseTenantService {
   }
 
   async updateCode(code: string): Promise<Tenant> {
-    const existing = await this.findTransactionDANGER((tx) =>
+    const existing = await this.startReadonlyTxDANGER((tx) =>
       tx.findOne(Tenant, { where: { code } })
     );
     if (existing) {
       throw new HttpsError("already-exists", `Already exists: "${code}"`);
     }
 
-    return this.transaction(async (tx) => {
+    return this.startTx(async (tx) => {
       const model = new TenantModel(this).updateCode(code);
       return {
         returns: () => model.tenant,

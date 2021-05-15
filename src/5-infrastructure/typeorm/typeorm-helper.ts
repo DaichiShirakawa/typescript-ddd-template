@@ -1,36 +1,69 @@
-import { EntityManager, FindConditions, getConnection } from "typeorm";
-import { MyBaseEntity } from "../1-entities/base/base-entity";
-import { BaseModel } from "../2-models/base/base-model";
+import {
+  EntityManager,
+  FindConditions,
+  getConnection,
+  getRepository,
+} from "typeorm";
+import { QueryDeepPartialEntity } from "typeorm/query-builder/QueryPartialEntity";
+import { Context, ContextHolder } from "../../0-definitions/context";
+import { MyBaseEntity } from "../../1-entities/base/base-entity";
+import { BaseModel } from "../../2-models/base/base-model";
 import {
   SavedTarget,
   SaveTarget,
   Transaction,
   TxProcessor,
-} from "../3-services/base/transaction";
-import { HttpsError } from "../express/https-error";
-import { Context, ContextHolder } from "../express/context/base-context";
+} from "../../3-services/base/transaction";
+import { HttpsError } from "../../0-definitions/https-error";
+import { TxSet, ReadonlyTxProcessor } from "../../3-services/base/transaction";
 
-export class TransactionHelper {
+export class TypeORMHelper {
+  /**
+   * Save すべきプロパティに絞ったオブジェクトを返す
+   *
+   * そのまま Entity 全体を指定して Update すると、
+   * UpdatedAtColumn 等意図しないフィールドまで含まれるため、
+   * Save する場合はこれを用いる。
+   */
+  static asSaveEntity<E extends MyBaseEntity>(
+    entity: E
+  ): QueryDeepPartialEntity<E> {
+    const { columns } = getRepository(entity.constructor).metadata;
+    const result: any = {};
+
+    for (const col of columns) {
+      if (col.isCreateDate || col.isUpdateDate) {
+        continue;
+      }
+      if (entity.isNewEntity || entity.updatedProps.has(col.propertyName)) {
+        result[col.propertyName] = (entity as any)[col.propertyName];
+      }
+    }
+
+    return result;
+  }
+
   /**
    * models 管理下にあるすべての entities を Save したあとに returns() の結果を返す
    */
-  static async start<Tx extends Transaction, C extends Context, R>(
-    txClass: new (tx: EntityManager, ch: ContextHolder<C>) => Tx,
+  static async startTx<C extends Context, R>(
+    txSet: TxSet<C>,
     ch: ContextHolder<C>,
     func: TxProcessor<R>
   ): Promise<R> {
     const qr = getConnection().createQueryRunner();
+    const { txClass } = txSet;
     try {
-      console.error(`Start BaseTransaction`);
+      console.error(`Start ${txClass.constructor.name}`);
       await qr.startTransaction();
       const tx = new txClass(qr.manager, ch);
       const result = await func(tx);
 
       const saveTargets = result.saveModels.flatMap((model) =>
-        TransactionHelper.toSaveTargets(model)
+        TypeORMHelper.toSaveTargets(model)
       );
 
-      TransactionHelper.checkDuplicate(saveTargets);
+      TypeORMHelper.checkDuplicate(saveTargets);
 
       const savedTargets = await tx.save(saveTargets);
 
@@ -38,15 +71,42 @@ export class TransactionHelper {
         result.statistics({ savedTargets });
       }
 
-      console.error(`Commit BaseTransaction`);
+      console.error(`Commit ${txClass.constructor.name}`);
       await qr.commitTransaction();
-      savedTargets.forEach((e) => e.entity.saved());
+
+      TypeORMHelper.updateDependencies(savedTargets);
 
       return result.returns ? result.returns() : (undefined as any);
     } catch (e) {
-      console.error(`Rollback BaseTransaction`);
+      console.error(`Rollback ${txClass.constructor.name}`);
       await qr.rollbackTransaction().catch();
       throw e;
+    }
+  }
+
+  /**
+   * models 管理下にあるすべての entities を Save したあとに returns() の結果を返す
+   */
+  static async startReadonlyTx<C extends Context, R>(
+    txSet: TxSet<C>,
+    ch: ContextHolder<C>,
+    func: ReadonlyTxProcessor<R>
+  ): Promise<R> {
+    const qr = getConnection().createQueryRunner();
+    const { readonlyTxClass } = txSet;
+    try {
+      console.error(`Start ${readonlyTxClass.constructor.name}`);
+      await qr.startTransaction();
+      const tx = new readonlyTxClass(qr.manager, ch);
+      const result = await func(tx);
+
+      console.error(`Finish ${readonlyTxClass.constructor.name}`);
+      return result ? result : (undefined as any);
+    } catch (e) {
+      console.error(`Error on ${readonlyTxClass.constructor.name}`);
+      throw e;
+    } finally {
+      await qr.rollbackTransaction().catch();
     }
   }
 
@@ -78,7 +138,7 @@ export class TransactionHelper {
       arrayIndex?: number
     ) => {
       if (data instanceof BaseModel) {
-        result.push(...TransactionHelper.toSaveTargets(data));
+        result.push(...TypeORMHelper.toSaveTargets(data));
       } else if (data instanceof MyBaseEntity) {
         result.push({
           model: model,

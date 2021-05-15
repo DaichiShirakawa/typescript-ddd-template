@@ -1,5 +1,11 @@
-import { Context, ContextHolder } from "../../express/context/base-context";
-import { Transaction, TxProcessor, TxStarter } from "./transaction";
+import { Context, ContextHolder } from "../../0-definitions/context";
+import { TypeORMHelper } from "../../5-infrastructure/typeorm/typeorm-helper";
+import {
+  Transaction,
+  TxProcessor,
+  TxSet,
+  ReadonlyTxProcessor,
+} from "./transaction";
 
 /**
  * Model を呼び Transaction を扱う Service のベースです
@@ -7,13 +13,7 @@ import { Transaction, TxProcessor, TxStarter } from "./transaction";
 export abstract class BaseService<C extends Context = Context>
   implements ContextHolder<C>
 {
-  static START_TX: TxStarter<any>;
-  static START_READONLY_TX: TxStarter<any>;
-
-  static initialize(startTx: TxStarter, startReadonlyTx: TxStarter) {
-    BaseService.START_TX = startTx;
-    BaseService.START_READONLY_TX = startReadonlyTx;
-  }
+  static TX_SET: TxSet<any>;
 
   readonly context: C;
 
@@ -25,19 +25,14 @@ export abstract class BaseService<C extends Context = Context>
    * 拡張されたトランザクションを返します
    * @see {Transaction}
    */
-  protected transaction<R>(func: TxProcessor<R>): Promise<R> {
-    return BaseService.START_TX(this, func as any);
+  protected startTx<R>(func: TxProcessor<R>): Promise<R> {
+    return TypeORMHelper.startTx(BaseService.TX_SET, this, func);
   }
 
   /**
    * 保存処理が発生しない場合にのみ使ってください。
    */
-  protected findTransaction<R>(
-    func: (tx: Transaction) => R | Promise<R>
-  ): Promise<R> {
-    return BaseService.START_READONLY_TX(this, async (tx) => ({
-      returns: () => func(tx as any),
-      saveModels: [],
-    }));
+  protected startReadonlyTx<R>(func: ReadonlyTxProcessor<R>): Promise<R> {
+    return TypeORMHelper.startReadonlyTx(BaseService.TX_SET, this, func);
   }
 }

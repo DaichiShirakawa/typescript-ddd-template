@@ -1,6 +1,6 @@
 import { MyBaseEntity } from "../../1-entities/base/base-entity";
-import { Context, ContextHolder } from "../../express/context/base-context";
-import { HttpsError } from "../../express/https-error";
+import { Context, ContextHolder } from "../../0-definitions/context";
+import { HttpsError } from "../../0-definitions/https-error";
 
 export type ModelDependencies = {
   [name: string]: MyBaseEntity | MyBaseEntity[] | BaseModel | BaseModel[];

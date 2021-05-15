@@ -1,9 +1,6 @@
 import { Request } from "express";
-import {
-  consoleSecurity,
-  consoleTenantSecurity,
-} from "./security/console-security";
-import { Securities } from "./security/securities";
+import { Securities, Scopes } from "./securities";
+import { ConsoleSecurity } from "./console-security";
 
 /**
  * Authentication middleware for tsoa @Security
@@ -11,16 +8,13 @@ import { Securities } from "./security/securities";
 export async function expressAuthentication(
   req: Request,
   security: Securities,
-  scopes: string[] = []
+  scopes: Scopes[] = []
 ) {
   switch (security) {
     case Securities.CONSOLE:
-      return await consoleSecurity(req, security, scopes);
+      return await ConsoleSecurity.verify(req, security, scopes);
 
-    case Securities.CONSOLE_TENANT:
-      return await consoleTenantSecurity(req, security, scopes);
-
-    case Securities.APP:
+    case Securities.MOBILE:
       throw new Error(`Securities.APP not implemented`);
 
     default:

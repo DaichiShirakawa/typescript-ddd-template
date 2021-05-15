@@ -3,5 +3,10 @@
   "npm.includeDirectories": ["console", "server-renewal"],
   "debug.javascript.autoAttachFilter": "onlyWithFlag",
   "editor.formatOnSave": true,
-  "cSpell.words": ["Middlewares", "tsoa", "typeorm"]
+  "cSpell.words": [
+    "Middlewares",
+    "tsoa",
+    "typeorm"
+  ],
+  "npm.runInTerminal": false
 }

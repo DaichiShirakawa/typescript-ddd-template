@@ -8,7 +8,7 @@ import cloneDeep from "lodash/cloneDeep";
  * - immutable object を想定した update({...values}) を定義
  *
  */
-export abstract class MyBaseEntity<T extends MyBaseEntity<any> = any> {
+export abstract class MyBaseEntity<SELF extends MyBaseEntity = any> {
   /**
    * データの一意性を判定するために必ず定義する
    */
@@ -21,13 +21,11 @@ export abstract class MyBaseEntity<T extends MyBaseEntity<any> = any> {
    *
    * @param init
    */
-  public constructor(init: Partial<T>) {
+  public constructor(init: Partial<SELF>) {
     Object.assign(this, init);
 
-    if (init != null) {
-      // TypeORM から生成の場合 init==null
-      this._txNeedInsert = true;
-    }
+    // TypeORM から生成の場合 init==null
+    this.isNewEntity = init != null;
   }
 
   /**
@@ -40,41 +38,26 @@ export abstract class MyBaseEntity<T extends MyBaseEntity<any> = any> {
    * @param changes 変更したいプロパティ
    * @returns 自身の clone に changes の内容をかぶせたインスタンス
    */
-  public set(changes: Partial<T>): T {
+  public set(changes: Partial<SELF>): SELF {
     changes = { ...changes };
 
     for (const key in changes) {
       if ((changes as any)[key] === undefined) delete (changes as any)[key];
     }
 
-    const clone: T = cloneDeep(this) as any;
+    const clone: SELF = cloneDeep(this) as any;
     Object.assign(clone, {
       ...changes,
+      isNewEntity: this.isNewEntity,
+      updatedProps: new Set([...this.updatedProps, ...Object.keys(changes)]),
     });
 
-    clone._txUpdatedPropNames = Object.keys(changes);
     return clone;
   }
 
   static CURRENT_TX_SEQ = 1;
 
   readonly txSeq = MyBaseEntity.CURRENT_TX_SEQ++;
-  private _txNeedInsert: boolean = false;
-  private _txUpdatedPropNames: null | (keyof T)[] = null;
-
-  get isNeedInsert() {
-    return this._txNeedInsert;
-  }
-
-  get updatedPropNames() {
-    return this._txUpdatedPropNames;
-  }
-
-  /**
-   * Transaction から Save が完了したときに呼ぶ
-   */
-  saved() {
-    this._txNeedInsert = true;
-    this._txUpdatedPropNames = null;
-  }
+  readonly isNewEntity: boolean = false;
+  readonly updatedProps: ReadonlySet<keyof SELF> = new Set();
 }

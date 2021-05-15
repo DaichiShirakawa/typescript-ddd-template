@@ -1,9 +1,8 @@
-import { HttpsError } from "../../express/https-error";
-import { ContextHolder } from "../../express/context/base-context";
-import { BaseModel, ModelDependencies } from "./base-model";
-import { TenantContext } from "../../express/context/tenant-context";
-import { ModelHelper } from "./model-helper";
 import { Tenant } from "../../1-entities/tenant.entity";
+import { HttpsError } from "../../0-definitions/https-error";
+import { BaseModel, ModelDependencies } from "./base-model";
+import { ModelHelper } from "./model-helper";
+import { TenantContext, TenantContextHolder } from "./tenant-context";
 
 /**
  * Tenant 配下のデータを扱うことに特化した Model
@@ -12,7 +11,7 @@ import { Tenant } from "../../1-entities/tenant.entity";
 export abstract class BaseTenantModel<
   D extends ModelDependencies
 > extends BaseModel<TenantContext, D> {
-  constructor(ch: ContextHolder<TenantContext>, dependencies: D) {
+  constructor(ch: TenantContextHolder, dependencies: D) {
     super(ch, dependencies);
 
     const errors = ModelHelper.toEntitiesArray(this).filter(

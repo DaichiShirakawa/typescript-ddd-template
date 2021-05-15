@@ -1,6 +1,6 @@
 import { Request } from "express";
 import { Securities } from "../security/securities";
-import { Context } from "./base-context";
+import { Context } from "../../0-definitions/context";
 
 type RequestType = {
   executeId: string;
@@ -17,10 +17,14 @@ type RequestType = {
   scopes: string[];
 };
 
+type DATASET = {
+  request: RequestType;
+};
+
 /**
  * 1 APIリクエストの中で不変なインスタンス
  */
-export class APIContext extends Context<APIContext> {
+export class APIContext extends Context<DATASET> {
   constructor(req: Request, security: Securities, scopes: string[]) {
     super({
       request: {
@@ -37,6 +41,6 @@ export class APIContext extends Context<APIContext> {
   }
 
   public get request(): RequestType {
-    return this.context.request!;
+    return this.dataset.request!;
   }
 }

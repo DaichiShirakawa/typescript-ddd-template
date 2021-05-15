@@ -10,14 +10,11 @@ import {
   Security,
   Tags,
 } from "tsoa";
-import { Tenant } from "../1-entities/tenant.entity";
-import { TenantService } from "../3-services/tenant.service";
-import { Securities } from "../express/security/securities";
-import {
-  ConsoleReq,
-  ConsoleTenantReq,
-} from "../express/security/console-security";
-import { RegisterTenantReq } from "./interfaces/tenant.if";
+import { Tenant } from "../../1-entities/tenant.entity";
+import { TenantService } from "../../3-services/tenant.service";
+import { APIReq, TenantScopedReq } from "../security/console-security";
+import { Scopes, Securities } from "../security/securities";
+import { RegisterTenantReq } from "../interfaces/tenant.if";
 
 @Route("/tenants")
 @Tags("01: Tenant")
@@ -25,7 +22,7 @@ export class TenantAPI extends Controller {
   @Post("/")
   @Security(Securities.CONSOLE)
   async register(
-    @Request() req: ConsoleReq,
+    @Request() req: APIReq,
     @Body() data: RegisterTenantReq
   ): Promise<Tenant> {
     return TenantService.register(req, data);
@@ -33,23 +30,23 @@ export class TenantAPI extends Controller {
 
   @Get("/")
   @Security(Securities.CONSOLE)
-  async list(@Request() req: ConsoleTenantReq): Promise<Tenant[]> {
+  async list(@Request() req: TenantScopedReq): Promise<Tenant[]> {
     return new TenantService(req).list();
   }
 
   @Get("/:tenantId")
-  @Security(Securities.CONSOLE_TENANT)
+  @Security(Securities.CONSOLE, [Scopes.TENANT])
   async find(
-    @Request() req: ConsoleTenantReq,
+    @Request() req: TenantScopedReq,
     @Path() tenantId: string
   ): Promise<Tenant> {
     return new TenantService(req).find(tenantId);
   }
 
   @Patch("/:tenantId/name")
-  @Security(Securities.CONSOLE_TENANT)
+  @Security(Securities.CONSOLE, [Scopes.TENANT])
   async updateName(
-    @Request() req: ConsoleTenantReq,
+    @Request() req: TenantScopedReq,
     @Body() data: { name: string },
     @Path() tenantId: string
   ) {
@@ -57,9 +54,9 @@ export class TenantAPI extends Controller {
   }
 
   @Patch("/:tenantId/code")
-  @Security(Securities.CONSOLE_TENANT)
+  @Security(Securities.CONSOLE, [Scopes.TENANT])
   async updateCode(
-    @Request() req: ConsoleTenantReq,
+    @Request() req: TenantScopedReq,
     @Body() data: { code: string },
     @Path() tenantId: string
   ) {

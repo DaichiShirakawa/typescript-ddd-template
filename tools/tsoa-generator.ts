@@ -9,11 +9,11 @@ import {
 (async () => {
   const expressRoot = `src/express`;
   const outputDirectory = `${expressRoot}/tsoa-generated`;
-  const routesFileName = `api-routes.ts`;
+  const routesFileName = `express-routes.ts`;
 
   const entryFile = `src/functions.index.ts`;
   const controllerPathGlobs = [`src/**/*.api.ts`];
-  const authenticationModule = `${expressRoot}/api-authenticator.ts`;
+  const authenticationModule = `${expressRoot}/authenticator.ts`;
 
   const swaggerOpts: ExtendedSpecConfig = {
     schemes: ["http", "https"],

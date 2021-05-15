@@ -6,14 +6,16 @@ import {
   getRepository,
   ObjectLiteral,
 } from "typeorm";
-import { MyBaseEntity } from "../1-entities/base/base-entity";
-import { HttpsError } from "../express/https-error";
-import { ContextHolder } from "../express/context/base-context";
-import { TenantContext } from "../express/context/tenant-context";
-import { AllTransaction } from "./all-transaction";
-import { TransactionHelper } from "./transaction-helper";
-import { BaseTenantEntity } from "../1-entities/base/base-tenant-entity";
-import { TxStarter, TxProcessor } from "../3-services/base/transaction";
+import { MyBaseEntity } from "../../1-entities/base/base-entity";
+import { TenantScopedEntity } from "../../1-entities/base/tenant-scoped-entity";
+import {
+  TenantContext,
+  TenantContextHolder,
+} from "../../2-models/base/tenant-context";
+import { TxProcessor } from "../../3-services/base/transaction";
+import { HttpsError } from "../../0-definitions/https-error";
+import { TypeORMTx } from "./typeorm-tx";
+import { TypeORMHelper } from "./typeorm-helper";
 
 /**
  * TypeORM のトランザクション(EntityManager) をテナントコンテキストに合わせて拡張した Transaction です。
@@ -21,14 +23,7 @@ import { TxStarter, TxProcessor } from "../3-services/base/transaction";
  * - insert/update 後に最新データを select して返すなど、拡張されています
  * - TenantEntity を継承した Entity に対して、自動で tenantId を加味した読み書きを行います
  */
-export class TenantTransaction extends AllTransaction<TenantContext> {
-  static get starter(): TxStarter<TenantContext> {
-    return (
-      ch: ContextHolder<TenantContext>,
-      func: TxProcessor<AllTransaction>
-    ) => TransactionHelper.start(TenantTransaction, ch, func);
-  }
-
+export class TypeORMTenantScopedTx extends TypeORMTx<TenantContext> {
   /**
    * 対象がTenantEntity型であるか、
    * またTenantEntityのインスタンスである場合、ContextのTenantに属するものであることを確認します。
@@ -37,7 +32,7 @@ export class TenantTransaction extends AllTransaction<TenantContext> {
   isTenantEntity<T extends MyBaseEntity<any>>(
     entity: T | EntityTarget<T>
   ): boolean {
-    if (entity instanceof BaseTenantEntity) {
+    if (entity instanceof TenantScopedEntity) {
       if (this.context.hasTenant && entity.tenantId !== this.context.tenantId) {
         throw new HttpsError(
           "internal",

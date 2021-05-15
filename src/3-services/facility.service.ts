@@ -1,15 +1,15 @@
 import { TenantModel } from "../2-models/tenant.model";
-import { HttpsError } from "../express/https-error";
+import { HttpsError } from "../0-definitions/https-error";
 import { BaseTenantService } from "./base/base-tenant-service";
 import { Facility } from "../1-entities/facility.entity";
 
 export class FacilityService extends BaseTenantService {
   async list(): Promise<Facility[]> {
-    return await this.findTransaction((tx) => tx.find(Facility));
+    return await this.startReadonlyTx((tx) => tx.find(Facility));
   }
 
   async register(init: Pick<Facility, "name">): Promise<Facility> {
-    return this.transaction(async (tx) => {
+    return this.startTx(async (tx) => {
       const existing = await tx.findOne(Facility, {
         where: { name: init.name },
       });

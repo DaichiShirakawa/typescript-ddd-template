@@ -1,4 +1,4 @@
-import { ExpressApp } from "./express/express";
-import "./helpers/app-initializer";
+import "./0-definitions/env-def";
+import { ExpressApp } from "./express";
 
 export const api = ExpressApp;

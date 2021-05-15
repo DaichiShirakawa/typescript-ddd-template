@@ -1,19 +1,16 @@
 import { Tenant } from "../../1-entities/tenant.entity";
-import { TenantContext } from "../../express/context/tenant-context";
+import { TenantContext } from "../../2-models/base/tenant-context";
 import { BaseService } from "./base-service";
-import { TxStarter, TxProcessor, Transaction } from "./transaction";
+import { TypeORMHelper } from "../../5-infrastructure/typeorm/typeorm-helper";
+import {
+  Transaction,
+  TxProcessor,
+  TxSet,
+  ReadonlyTxProcessor,
+} from "./transaction";
 
 export abstract class BaseTenantService extends BaseService<TenantContext> {
-  static START_TX: TxStarter<TenantContext>;
-  static START_READONLY_TX: TxStarter<TenantContext>;
-
-  static initialize(
-    startTx: TxStarter<TenantContext>,
-    startReadonlyTx: TxStarter<TenantContext>
-  ) {
-    BaseTenantService.START_TX = startTx;
-    BaseTenantService.START_READONLY_TX = startReadonlyTx;
-  }
+  static TX_SET: TxSet<TenantContext>;
 
   get tenant(): Tenant {
     return this.context.tenant;
@@ -27,36 +24,31 @@ export abstract class BaseTenantService extends BaseService<TenantContext> {
    * Tenant に属するデータのみ読み書きできるよう、拡張された Transaction
    * @see {Transaction}
    */
-  protected transaction<R>(func: TxProcessor<R>): Promise<R> {
-    return BaseTenantService.START_TX(this, func as any);
+  protected startTx<R>(func: TxProcessor<R>): Promise<R> {
+    return TypeORMHelper.startTx(BaseTenantService.TX_SET, this, func);
   }
 
   /**
    * 読み込み専用 Transaction
    */
-  protected findTransaction<R>(
-    func: (tx: Transaction) => R | Promise<R>
-  ): Promise<R> {
-    return BaseTenantService.START_READONLY_TX(this, async (tx) => ({
-      returns: () => func(tx as any),
-      saveModels: [],
-    }));
+  protected startReadonlyTx<R>(func: ReadonlyTxProcessor<R>): Promise<R> {
+    return TypeORMHelper.startReadonlyTx(BaseTenantService.TX_SET, this, func);
   }
 
   /**
    * テナントに属しないデータへもアクセスできる Transaction
    * @see {Transaction}
    */
-  protected transactionDANGER<R>(func: TxProcessor<R>): Promise<R> {
-    return super.transaction(func);
+  protected startTxDANGER<R>(func: TxProcessor<R>): Promise<R> {
+    return super.startTx(func);
   }
 
   /**
    * テナントに属しないデータへもアクセスできる読み込み専用 Transaction
    */
-  protected findTransactionDANGER<R>(
+  protected startReadonlyTxDANGER<R>(
     func: (tx: Transaction) => R | Promise<R>
   ): Promise<R> {
-    return super.findTransaction(func);
+    return super.startReadonlyTx(func);
   }
 }

@@ -1,10 +1,10 @@
-import { Tenant } from "../1-entities/tenant.entity";
-import { HttpsError } from "../express/https-error";
-import { ContextHolder, Context } from "../express/context/base-context";
-import { FacilityModel } from "./facility.model";
-import { BaseTenantModel } from "./base/base-tenant-model";
-import { TenantContext } from "../express/context/tenant-context";
+import { ContextHolder } from "../0-definitions/context";
 import { Facility } from "../1-entities/facility.entity";
+import { Tenant } from "../1-entities/tenant.entity";
+import { HttpsError } from "../0-definitions/https-error";
+import { BaseTenantModel } from "./base/base-tenant-model";
+import { TenantContext, TenantContextHolder } from "./base/tenant-context";
+import { FacilityModel } from "./facility.model";
 
 type D = {
   tenant: Tenant;
@@ -17,7 +17,7 @@ type D = {
 export class TenantModel extends BaseTenantModel<D> {
   static TENANT_CODE_REGEX = /^[a-z0-9\-_]{3,32}$/;
 
-  constructor(ch: ContextHolder<TenantContext>) {
+  constructor(ch: TenantContextHolder) {
     if (!ch.context.hasTenant) {
       throw new HttpsError(
         "internal",
@@ -32,7 +32,7 @@ export class TenantModel extends BaseTenantModel<D> {
 
   static register(ch: ContextHolder, init: Pick<Tenant, "name" | "code">) {
     const tenant = new Tenant(init);
-    const context = new TenantContext({ source: ch.context, tenant });
+    const context = new TenantContext({ source: ch, tenant });
     const model = new TenantModel({ context });
     model.validateCode();
     return model;
