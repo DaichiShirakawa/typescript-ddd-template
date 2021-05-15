@@ -8,7 +8,7 @@ import {
 } from "typeorm";
 import { v4 } from "uuid";
 import { Facility } from "./facility.entity";
-import { MyBaseEntity } from "./_base-entity";
+import { MyBaseEntity } from "./base/base-entity";
 
 /**
  * テナント(お客様組織)
@@ -34,7 +34,7 @@ export class Tenant extends MyBaseEntity<Tenant> {
   readonly name: string;
   /**
    * URLの一部などに利用される、開発者が認識しやすい名称
-   * 例: "srkw"
+   * 例: "my-company"
    */
   @Column()
   readonly code: string;

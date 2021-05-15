@@ -1,6 +1,6 @@
 import { TenantModel } from "../2-models/tenant.model";
 import { HttpsError } from "../express/https-error";
-import { BaseTenantService } from "./_base-tenant-model";
+import { BaseTenantService } from "./base/base-tenant-service";
 import { Facility } from "../1-entities/facility.entity";
 
 export class FacilityService extends BaseTenantService {
@@ -21,10 +21,10 @@ export class FacilityService extends BaseTenantService {
       }
 
       const tenantModel = new TenantModel(this);
-      const facilityModel = tenantModel.registerFacility(init);
+      const facilityModel = tenantModel.addFacility(init);
 
       return {
-        returns: () => facilityModel.facility,
+        returns: () => facilityModel.dependencies.facility,
         saveModels: [facilityModel],
       };
     });

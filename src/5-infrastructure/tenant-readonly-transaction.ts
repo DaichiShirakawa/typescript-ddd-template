@@ -1,24 +1,25 @@
 import { getConnection } from "typeorm";
-import { MyBaseEntity } from "../1-entities/_base-entity";
+import { MyBaseEntity } from "../1-entities/base/base-entity";
+import { TxProcessor, TxStarter } from "../3-services/base/transaction";
 import { HttpsError } from "../express/https-error";
 import { ContextHolder } from "../express/security/base-context";
 import { TenantContext } from "../express/security/tenant-context";
-import { TxProcessor } from "./base-transaction";
 import { TenantTransaction } from "./tenant-transaction";
 
 /**
  * save 系利用不可
  */
-export class ReadonlyTenantTransaction extends TenantTransaction {
-  static start<T>(
-    ch: ContextHolder<TenantContext>,
-    func: TxProcessor<ReadonlyTenantTransaction, T>
-  ): Promise<T> {
-    return getConnection().transaction(async (tx) => {
-      const tenantTx = new ReadonlyTenantTransaction(tx, ch);
-      const result = await func(tenantTx);
-      return result.returns ? result.returns() : (undefined as any);
-    });
+export class TenantReadonlyTransaction extends TenantTransaction {
+  static get starter(): TxStarter<TenantContext> {
+    return (
+      ch: ContextHolder<TenantContext>,
+      func: TxProcessor<TenantReadonlyTransaction>
+    ) =>
+      getConnection().transaction(async (tx) => {
+        const tenantTx = new TenantReadonlyTransaction(tx, ch);
+        const result = await func(tenantTx);
+        return result.returns ? result.returns() : (undefined as any);
+      });
   }
 
   /**

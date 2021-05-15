@@ -6,12 +6,14 @@ import {
   getRepository,
   ObjectLiteral,
 } from "typeorm";
-import { MyBaseEntity } from "../1-entities/_base-entity";
-import { TenantEntity } from "../1-entities/_tenant-entity";
+import { MyBaseEntity } from "../1-entities/base/base-entity";
 import { HttpsError } from "../express/https-error";
 import { ContextHolder } from "../express/security/base-context";
 import { TenantContext } from "../express/security/tenant-context";
-import { BaseTransaction, TxProcessor } from "./base-transaction";
+import { AllTransaction } from "./all-transaction";
+import { TransactionHelper } from "./transaction-helper";
+import { BaseTenantEntity } from "../1-entities/base/base-tenant-entity";
+import { TxStarter, TxProcessor } from "../3-services/base/transaction";
 
 /**
  * TypeORM のトランザクション(EntityManager) をテナントコンテキストに合わせて拡張した Transaction です。
@@ -19,20 +21,12 @@ import { BaseTransaction, TxProcessor } from "./base-transaction";
  * - insert/update 後に最新データを select して返すなど、拡張されています
  * - TenantEntity を継承した Entity に対して、自動で tenantId を加味した読み書きを行います
  */
-export class TenantTransaction extends BaseTransaction<TenantContext> {
-  /**
-   * Tenant.codeの重複検索など、Tenant横断のクエリを実行したい場合に利用します。
-   * それ以外の場合に使うとリークの危険性があります。
-   */
-  get DANGER() {
-    return this.tx;
-  }
-
-  static async start<R>(
-    ch: ContextHolder<TenantContext>,
-    func: TxProcessor<TenantTransaction, R>
-  ): Promise<R> {
-    return BaseTransaction._start(TenantTransaction, ch, func);
+export class TenantTransaction extends AllTransaction<TenantContext> {
+  static get starter(): TxStarter<TenantContext> {
+    return (
+      ch: ContextHolder<TenantContext>,
+      func: TxProcessor<AllTransaction>
+    ) => TransactionHelper.start(TenantTransaction, ch, func);
   }
 
   /**
@@ -43,7 +37,7 @@ export class TenantTransaction extends BaseTransaction<TenantContext> {
   isTenantEntity<T extends MyBaseEntity<any>>(
     entity: T | EntityTarget<T>
   ): boolean {
-    if (entity instanceof TenantEntity) {
+    if (entity instanceof BaseTenantEntity) {
       if (this.context.hasTenant && entity.tenantId !== this.context.tenantId) {
         throw new HttpsError(
           "internal",

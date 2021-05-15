@@ -1,22 +1,18 @@
 import { Facility } from "../1-entities/facility.entity";
 import { ContextHolder } from "../express/security/base-context";
-import { BaseTenantModel } from "./_base-tenant-model";
+import { BaseTenantModel } from "./base/base-tenant-model";
 import { TenantContext } from "../express/security/tenant-context";
 
-type E = { facility: Facility };
+type D = { facility: Facility };
 
 /**
  * for Facility layer
  */
-export class FacilityModel extends BaseTenantModel<E> implements E {
+export class FacilityModel extends BaseTenantModel<D> {
   static PROVIDER_NAME_REGEX = /^[A-z]{1}[A-z0-9\-_]{0,31}[A-z0-9]{1}$/;
 
-  constructor(ch: ContextHolder<TenantContext>, init: E) {
-    super(ch, { ...init });
-  }
-
-  get facility() {
-    return this.entities.facility;
+  constructor(ch: ContextHolder<TenantContext>, dependencies: D) {
+    super(ch, { ...dependencies });
   }
 
   static register(ch: ContextHolder<TenantContext>, init: Partial<Facility>) {
@@ -25,7 +21,8 @@ export class FacilityModel extends BaseTenantModel<E> implements E {
   }
 
   updateFacilityName(name: string) {
-    this.entities.facility = this.facility.clone({ name });
+    const { facility } = this.dependencies;
+    this.update("facility", facility.set({ name }));
     return this;
   }
 }

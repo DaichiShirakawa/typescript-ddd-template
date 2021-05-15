@@ -9,13 +9,13 @@ import {
 } from "typeorm";
 import { v4 } from "uuid";
 import { Tenant } from "./tenant.entity";
-import { TenantEntity } from "./_tenant-entity";
+import { BaseTenantEntity } from "./base/base-tenant-entity";
 
 /**
  * テナントに属する施設
  */
 @Entity("facilities")
-export class Facility extends TenantEntity<Facility> {
+export class Facility extends BaseTenantEntity<Facility> {
   @PrimaryColumn({ length: 48 })
   readonly id: string = `facility_${v4()}`;
 

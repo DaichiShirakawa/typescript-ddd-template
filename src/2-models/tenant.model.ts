@@ -1,20 +1,20 @@
 import { Tenant } from "../1-entities/tenant.entity";
 import { HttpsError } from "../express/https-error";
-import { ContextHolder, BaseContext } from "../express/security/base-context";
+import { ContextHolder, Context } from "../express/security/base-context";
 import { FacilityModel } from "./facility.model";
-import { BaseTenantModel } from "./_base-tenant-model";
+import { BaseTenantModel } from "./base/base-tenant-model";
 import { TenantContext } from "../express/security/tenant-context";
 import { Facility } from "../1-entities/facility.entity";
 
-type E = {
+type D = {
   tenant: Tenant;
-  facilities: FacilityModel[];
+  facilityModels: FacilityModel[];
 };
 
 /**
  * テナントおよびテナント直下設定を担うモデル
  */
-export class TenantModel extends BaseTenantModel<E> implements E {
+export class TenantModel extends BaseTenantModel<D> {
   static TENANT_CODE_REGEX = /^[a-z0-9\-_]{3,32}$/;
 
   constructor(ch: ContextHolder<TenantContext>) {
@@ -24,11 +24,10 @@ export class TenantModel extends BaseTenantModel<E> implements E {
         `No tenant in context, use register() first`
       );
     }
-    super(ch, { tenant: ch.context.tenant, facilities: [] });
-  }
-
-  get facilities() {
-    return this.entities.facilities;
+    super(ch, {
+      tenant: ch.context.tenant,
+      facilityModels: [],
+    });
   }
 
   static register(ch: ContextHolder, init: Pick<Tenant, "name" | "code">) {
@@ -40,17 +39,19 @@ export class TenantModel extends BaseTenantModel<E> implements E {
   }
 
   updateName(name: string) {
-    this.entities.tenant = this.tenant.clone({ name });
+    const { tenant } = this.dependencies;
+    this.update("tenant", tenant.set({ name }));
     return this;
   }
 
   updateCode(code: string) {
-    this.entities.tenant = this.tenant.clone({ code });
+    const { tenant } = this.dependencies;
+    this.update("tenant", tenant.set({ code }));
     this.validateCode();
     return this;
   }
 
-  validateCode() {
+  private validateCode() {
     if (!this.tenant.code.match(TenantModel.TENANT_CODE_REGEX)) {
       throw new HttpsError(
         "out-of-range",
@@ -60,9 +61,10 @@ export class TenantModel extends BaseTenantModel<E> implements E {
     return this;
   }
 
-  registerFacility(init: Pick<Facility, "name">) {
-    const facilityModel = FacilityModel.register(this, init);
-    this.entities.facilities.push(facilityModel);
-    return facilityModel;
+  addFacility(init: Pick<Facility, "name">) {
+    const { facilityModels } = this.dependencies;
+    const added = FacilityModel.register(this, init);
+    this.update("facilityModels", [...facilityModels, added]);
+    return added;
   }
 }

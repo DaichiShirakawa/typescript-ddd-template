@@ -1,6 +1,6 @@
 import { Request } from "express";
 import { Securities } from "./securities";
-import { BaseContext } from "./base-context";
+import { Context } from "./base-context";
 
 type RequestType = {
   executeId: string;
@@ -20,7 +20,7 @@ type RequestType = {
 /**
  * 1 APIリクエストの中で不変なインスタンス
  */
-export class APIContext extends BaseContext<APIContext> {
+export class APIContext extends Context<APIContext> {
   constructor(req: Request, security: Securities, scopes: string[]) {
     super({
       request: {
