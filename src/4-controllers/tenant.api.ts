@@ -17,7 +17,7 @@ import {
   ConsoleReq,
   ConsoleTenantReq,
 } from "../express/security/console-security";
-import { RegisterTenantReq } from "./tenant.if";
+import { RegisterTenantReq } from "./interfaces/tenant.if";
 
 @Route("/tenants")
 @Tags("01: Tenant")

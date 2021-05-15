@@ -11,7 +11,7 @@ import {
 } from "tsoa";
 import { Securities } from "../express/security/securities";
 import { ConsoleTenantReq } from "../express/security/console-security";
-import { RegisterFacilityReq } from "./facility.if";
+import { RegisterFacilityReq } from "./interfaces/facility.if";
 import { Facility } from "../1-entities/facility.entity";
 import { FacilityService } from "../3-services/facility.service";
 
