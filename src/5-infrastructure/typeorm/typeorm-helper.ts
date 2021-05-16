@@ -6,16 +6,15 @@ import {
 } from "typeorm";
 import { QueryDeepPartialEntity } from "typeorm/query-builder/QueryPartialEntity";
 import { Context, ContextHolder } from "../../0-definitions/context";
+import { HttpsError } from "../../0-definitions/https-error";
 import { MyBaseEntity } from "../../1-entities/base/base-entity";
 import { BaseModel } from "../../2-models/base/base-model";
 import {
+  ReadonlyTxProcessor,
   SavedTarget,
   SaveTarget,
   Transaction,
-  TxProcessor,
 } from "../../3-services/base/transaction";
-import { HttpsError } from "../../0-definitions/https-error";
-import { TxSet, ReadonlyTxProcessor } from "../../3-services/base/transaction";
 
 export class TypeORMHelper {
   /**
@@ -49,64 +48,22 @@ export class TypeORMHelper {
   /**
    * models 管理下にあるすべての entities を Save したあとに returns() の結果を返す
    */
-  static async startTx<C extends Context, R>(
-    txSet: TxSet<C>,
+  static async startReadonlyTx<C extends Context, R>(
+    txClass: new (tx: EntityManager, ch: ContextHolder<C>) => Transaction,
     ch: ContextHolder<C>,
-    func: TxProcessor<R>
+    func: ReadonlyTxProcessor<R>
   ): Promise<R> {
     const qr = getConnection().createQueryRunner();
-    const { txClass } = txSet;
     try {
       console.error(`Start ${txClass.constructor.name}`);
       await qr.startTransaction();
       const tx = new txClass(qr.manager, ch);
       const result = await func(tx);
 
-      const saveTargets = result.saveModels.flatMap((model) =>
-        TypeORMHelper.toSaveTargets(model)
-      );
-
-      TypeORMHelper.checkDuplicate(saveTargets);
-
-      const savedTargets = await tx.save(saveTargets);
-
-      if (result.statistics) {
-        result.statistics({ savedTargets });
-      }
-
-      console.error(`Commit ${txClass.constructor.name}`);
-      await qr.commitTransaction();
-
-      TypeORMHelper.updateDependencies(savedTargets);
-
-      return result.returns ? result.returns() : (undefined as any);
-    } catch (e) {
-      console.error(`Rollback ${txClass.constructor.name}`);
-      await qr.rollbackTransaction().catch();
-      throw e;
-    }
-  }
-
-  /**
-   * models 管理下にあるすべての entities を Save したあとに returns() の結果を返す
-   */
-  static async startReadonlyTx<C extends Context, R>(
-    txSet: TxSet<C>,
-    ch: ContextHolder<C>,
-    func: ReadonlyTxProcessor<R>
-  ): Promise<R> {
-    const qr = getConnection().createQueryRunner();
-    const { readonlyTxClass } = txSet;
-    try {
-      console.error(`Start ${readonlyTxClass.constructor.name}`);
-      await qr.startTransaction();
-      const tx = new readonlyTxClass(qr.manager, ch);
-      const result = await func(tx);
-
-      console.error(`Finish ${readonlyTxClass.constructor.name}`);
+      console.error(`Finish ${txClass.constructor.name}`);
       return result ? result : (undefined as any);
     } catch (e) {
-      console.error(`Error on ${readonlyTxClass.constructor.name}`);
+      console.error(`Error on ${txClass.constructor.name}`);
       throw e;
     } finally {
       await qr.rollbackTransaction().catch();

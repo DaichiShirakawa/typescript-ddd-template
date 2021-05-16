@@ -1,10 +1,10 @@
 import { Context, ContextHolder } from "../../0-definitions/context";
-import { TypeORMHelper } from "../../5-infrastructure/typeorm/typeorm-helper";
+import { DUMMY_TX_STARTERS } from "./dummy-tx";
 import {
+  ReadonlyTxProcessor,
   Transaction,
   TxProcessor,
-  TxSet,
-  ReadonlyTxProcessor,
+  TxStarters as TxStarters,
 } from "./transaction";
 
 /**
@@ -13,7 +13,7 @@ import {
 export abstract class BaseService<C extends Context = Context>
   implements ContextHolder<C>
 {
-  static TX_SET: TxSet<any>;
+  static TX_STARTERS: TxStarters<any> = DUMMY_TX_STARTERS;
 
   readonly context: C;
 
@@ -26,13 +26,13 @@ export abstract class BaseService<C extends Context = Context>
    * @see {Transaction}
    */
   protected startTx<R>(func: TxProcessor<R>): Promise<R> {
-    return TypeORMHelper.startTx(BaseService.TX_SET, this, func);
+    return BaseService.TX_STARTERS.tx(this, func);
   }
 
   /**
    * 保存処理が発生しない場合にのみ使ってください。
    */
   protected startReadonlyTx<R>(func: ReadonlyTxProcessor<R>): Promise<R> {
-    return TypeORMHelper.startReadonlyTx(BaseService.TX_SET, this, func);
+    return BaseService.TX_STARTERS.readonlyTx(this, func);
   }
 }

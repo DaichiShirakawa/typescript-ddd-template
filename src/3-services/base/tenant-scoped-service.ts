@@ -5,12 +5,12 @@ import { TypeORMHelper } from "../../5-infrastructure/typeorm/typeorm-helper";
 import {
   Transaction,
   TxProcessor,
-  TxSet,
+  TxStarters,
   ReadonlyTxProcessor,
 } from "./transaction";
 
 export abstract class TenantScopedService extends BaseService<TenantContext> {
-  static TX_SET: TxSet<TenantContext>;
+  static TX_STARTERS: TxStarters<TenantContext>;
 
   get tenant(): Tenant {
     return this.context.tenant;
@@ -25,18 +25,14 @@ export abstract class TenantScopedService extends BaseService<TenantContext> {
    * @see {Transaction}
    */
   protected startTx<R>(func: TxProcessor<R>): Promise<R> {
-    return TypeORMHelper.startTx(TenantScopedService.TX_SET, this, func);
+    return TenantScopedService.TX_STARTERS.tx(this, func);
   }
 
   /**
    * 読み込み専用 Transaction
    */
   protected startReadonlyTx<R>(func: ReadonlyTxProcessor<R>): Promise<R> {
-    return TypeORMHelper.startReadonlyTx(
-      TenantScopedService.TX_SET,
-      this,
-      func
-    );
+    return TenantScopedService.TX_STARTERS.readonlyTx(this, func);
   }
 
   /**

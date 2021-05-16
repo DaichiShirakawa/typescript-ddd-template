@@ -1,4 +1,4 @@
-import { EntityTarget, FindManyOptions, EntityManager } from "typeorm";
+import { EntityTarget, FindManyOptions } from "typeorm";
 import { Context, ContextHolder } from "../../0-definitions/context";
 import { MyBaseEntity } from "../../1-entities/base/base-entity";
 import { BaseModel } from "../../2-models/base/base-model";
@@ -6,34 +6,44 @@ import { BaseModel } from "../../2-models/base/base-model";
 /**
  * Transaction ですべきことだけを定義した型
  */
-export type Transaction<C extends Context = Context> = ContextHolder<C> & {
+export abstract class Transaction<C extends Context = Context>
+  implements ContextHolder<C>
+{
+  readonly context: C;
+  readonly isReadonly: boolean;
+
+  constructor(ch: ContextHolder<C>, isReadonly: boolean) {
+    this.context = ch.context;
+    this.isReadonly = isReadonly;
+  }
+
   /**
    * insert した後、最新のデータを select して返します
    */
-  insert<T extends MyBaseEntity>(entity: T): Promise<T>;
+  abstract insert<T extends MyBaseEntity>(entity: T): Promise<T>;
 
   /**
    * update した後、最新のデータを select して返します
    */
-  update<T extends MyBaseEntity>(entity: T): Promise<T>;
+  abstract update<T extends MyBaseEntity>(entity: T): Promise<T>;
 
-  find<T extends MyBaseEntity<any>>(
+  abstract find<T extends MyBaseEntity<any>>(
     entityClass: EntityTarget<T>,
     options?: FindManyOptions<Omit<T, "tenantId">>
   ): Promise<T[]>;
 
-  findOne<T extends MyBaseEntity<any>>(
+  abstract findOne<T extends MyBaseEntity<any>>(
     entityClass: EntityTarget<T>,
     optionsOrId?: FindManyOptions<Omit<T, "tenantId">> | string
   ): Promise<T | undefined>;
 
-  findOneOrFail<T extends MyBaseEntity<any>>(
+  abstract findOneOrFail<T extends MyBaseEntity<any>>(
     entityClass: EntityTarget<T>,
     optionsOrId: FindManyOptions<Omit<T, "tenantId">> | string
   ): Promise<T>;
 
-  save(targets: SaveTarget[]): Promise<SavedTarget[]>;
-};
+  abstract save(targets: SaveTarget[]): Promise<SavedTarget[]>;
+}
 
 export type TxProcessor<R = undefined> = (tx: Transaction) => Promise<{
   /**
@@ -55,14 +65,12 @@ export type ReadonlyTxProcessor<R = undefined> = (
   tx: Transaction
 ) => R | Promise<R>;
 
-export type TxSet<C extends Context = Context> = {
-  txClass: new (tx: EntityManager, ch: ContextHolder<C>) => Transaction;
-  readonlyTxClass: new (tx: EntityManager, ch: ContextHolder<C>) => Transaction;
-  // tx: <R>(ch: ContextHolder<C>, func: TxProcessor<R>) => Promise<R>;
-  // readonlyTx: <R>(
-  //   ch: ContextHolder<C>,
-  //   func: ReadonlyTxProcessor<R>
-  // ) => Promise<R>;
+export type TxStarters<C extends Context = Context> = {
+  tx: <R>(ch: ContextHolder<C>, func: TxProcessor<R>) => Promise<R>;
+  readonlyTx: <R>(
+    ch: ContextHolder<C>,
+    func: ReadonlyTxProcessor<R>
+  ) => Promise<R>;
 };
 
 export type SaveTarget = {

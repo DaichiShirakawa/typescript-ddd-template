@@ -1,10 +1,31 @@
 import { EntityTarget, FindManyOptions } from "typeorm";
-import { Context } from "../../0-definitions/context";
 import { MyBaseEntity } from "../../1-entities/base/base-entity";
-import { SavedTarget, SaveTarget, Transaction, TxSet } from "./transaction";
+import { ContextHolder } from "../../0-definitions/context";
+import { TxProcessor, ReadonlyTxProcessor } from "./transaction";
+import {
+  SavedTarget,
+  SaveTarget,
+  Transaction,
+  TxStarters,
+} from "./transaction";
 
-export class DummyTx implements Transaction {
-  readonly context: Context;
+export class DummyTx extends Transaction {
+  static async startTx<R>(ch: ContextHolder, func: TxProcessor<R>): Promise<R> {
+    console.error(`Start ${DummyTx.constructor.name}`);
+    const tx = new DummyTx(ch, false);
+    const result = await func(tx);
+    return result.returns ? result.returns() : (null as any);
+  }
+
+  static async startReadonlyTx<R>(
+    ch: ContextHolder,
+    func: ReadonlyTxProcessor<R>
+  ): Promise<R> {
+    console.error(`Start READONLY ${DummyTx.constructor.name}`);
+    const tx = new DummyTx(ch, true);
+    const result = await func(tx);
+    return result;
+  }
 
   insert<T extends MyBaseEntity<any>>(entity: T): Promise<T> {
     throw new Error("Need set Transaction implementation to Service.TX_SET");
@@ -35,7 +56,7 @@ export class DummyTx implements Transaction {
   }
 }
 
-export const DUMMY_TX_SET: TxSet = {
-  txClass: DummyTx,
-  readonlyTxClass: DummyTx,
+export const DUMMY_TX_STARTERS: TxStarters = {
+  tx: DummyTx.startTx,
+  readonlyTx: DummyTx.startReadonlyTx,
 };

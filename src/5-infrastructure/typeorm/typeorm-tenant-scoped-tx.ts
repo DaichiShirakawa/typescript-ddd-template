@@ -9,7 +9,14 @@ import {
 import { HttpsError } from "../../0-definitions/https-error";
 import { MyBaseEntity } from "../../1-entities/base/base-entity";
 import { TenantScopedEntity } from "../../1-entities/base/tenant-scoped-entity";
-import { TenantContext } from "../../2-models/base/tenant-context";
+import {
+  TenantContext,
+  TenantContextHolder,
+} from "../../2-models/base/tenant-context";
+import {
+  TxProcessor,
+  ReadonlyTxProcessor,
+} from "../../3-services/base/transaction";
 import { TypeORMTx } from "./typeorm-tx";
 
 /**
@@ -19,6 +26,26 @@ import { TypeORMTx } from "./typeorm-tx";
  * - TenantEntity を継承した Entity に対して、自動で tenantId を加味した読み書きを行います
  */
 export class TypeORMTenantScopedTx extends TypeORMTx<TenantContext> {
+  /**
+   * models 管理下にあるすべての entities を Save したあとに returns() の結果を返す
+   */
+  static async startTx<R>(
+    ch: TenantContextHolder,
+    func: TxProcessor<R>
+  ): Promise<R> {
+    return super.startTx(ch, func, TypeORMTenantScopedTx);
+  }
+
+  /**
+   * 保存系が封じられた Tx
+   */
+  static async startReadonlyTx<R>(
+    ch: TenantContextHolder,
+    func: ReadonlyTxProcessor<R>
+  ): Promise<R> {
+    return super.startReadonlyTx(ch, func, TypeORMTenantScopedTx);
+  }
+
   /**
    * 対象がTenantEntity型であるか、
    * またTenantEntityのインスタンスである場合、ContextのTenantに属するものであることを確認します。
