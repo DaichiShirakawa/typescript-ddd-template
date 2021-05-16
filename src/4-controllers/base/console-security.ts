@@ -6,7 +6,7 @@ import {
   TenantContext,
   TenantContextHolder,
 } from "../../2-models/base/tenant-context";
-import { APIContext } from "../context/api-context";
+import { APIContext } from "./api-context";
 import { Scopes, Securities } from "./securities";
 
 export type APIReq = Request & ContextHolder<APIContext>;

@@ -35,7 +35,10 @@ export class TypeORMHelper {
       if (col.isCreateDate || col.isUpdateDate) {
         continue;
       }
-      if (entity.isNewEntity || entity.updatedProps.has(col.propertyName)) {
+      if (
+        entity.instanceMeta.isNewEntity ||
+        entity.instanceMeta.updatedProps.has(col.propertyName)
+      ) {
         result[col.propertyName] = (entity as any)[col.propertyName];
       }
     }

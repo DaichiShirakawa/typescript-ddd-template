@@ -1,5 +1,5 @@
 import { BaseService } from "../../3-services/base/base-service";
-import { BaseTenantService } from "../../3-services/base/base-tenant-service";
+import { TenantScopedService } from "../../3-services/base/tenant-scoped-service";
 import { TypeORMTx } from "../typeorm/typeorm-tx";
 import { TypeORMReadonlyTx } from "../typeorm/typeorm-readonly-tx";
 import { TypeORMTenantScopedTx } from "../typeorm/typeorm-tenant-scoped-tx";
@@ -11,7 +11,7 @@ export function initializeTransaction() {
     readonlyTxClass: TypeORMReadonlyTx,
   };
 
-  BaseTenantService.TX_SET = {
+  TenantScopedService.TX_SET = {
     txClass: TypeORMTenantScopedTx,
     readonlyTxClass: TypeORMTenantScopedReadonlyTx,
   };

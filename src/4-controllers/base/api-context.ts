@@ -1,5 +1,5 @@
 import { Request } from "express";
-import { Securities } from "../security/securities";
+import { Securities } from "./securities";
 import { Context } from "../../0-definitions/context";
 
 type RequestType = {

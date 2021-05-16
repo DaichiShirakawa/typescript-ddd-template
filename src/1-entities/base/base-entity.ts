@@ -3,12 +3,21 @@ import cloneDeep from "lodash/cloneDeep";
 /**
  * TypeORM エンティティはすべてこれを継承する
  * エンティティはすべて immutable な作りである想定
- *
- * - DB への insert / update の要求状態を保持
- * - immutable object を想定した update({...values}) を定義
- *
  */
 export abstract class MyBaseEntity<SELF extends MyBaseEntity = any> {
+  static CURRENT_INSTANCE_SEQ = 1;
+
+  private readonly _entityMeta: EntityInstanceMeta<SELF>;
+
+  /**
+   * - 新しく生成されたエンティティデータであるか
+   * - 変更があった場合、どのプロパティか
+   * - インスタンス連番 (clone による前後関係を表現するためのもの)
+   */
+  get instanceMeta() {
+    return this._entityMeta;
+  }
+
   /**
    * データの一意性を判定するために必ず定義する
    */
@@ -24,8 +33,12 @@ export abstract class MyBaseEntity<SELF extends MyBaseEntity = any> {
   public constructor(init: Partial<SELF>) {
     Object.assign(this, init);
 
-    // TypeORM から生成の場合 init==null
-    this.isNewEntity = init != null;
+    this._entityMeta = {
+      instanceSeq: MyBaseEntity.CURRENT_INSTANCE_SEQ++,
+      // TypeORM から生成の場合 init==null
+      isNewEntity: init != null,
+      updatedProps: new Set<keyof SELF>(),
+    };
   }
 
   /**
@@ -48,16 +61,21 @@ export abstract class MyBaseEntity<SELF extends MyBaseEntity = any> {
     const clone: SELF = cloneDeep(this) as any;
     Object.assign(clone, {
       ...changes,
-      isNewEntity: this.isNewEntity,
-      updatedProps: new Set([...this.updatedProps, ...Object.keys(changes)]),
+      _instanceMeta: {
+        ...clone._entityMeta,
+        updatedProps: new Set([
+          ...clone._entityMeta.updatedProps,
+          ...Object.keys(changes),
+        ]),
+      },
     });
 
     return clone;
   }
-
-  static CURRENT_TX_SEQ = 1;
-
-  readonly txSeq = MyBaseEntity.CURRENT_TX_SEQ++;
-  readonly isNewEntity: boolean = false;
-  readonly updatedProps: ReadonlySet<keyof SELF> = new Set();
 }
+
+type EntityInstanceMeta<SELF extends MyBaseEntity> = {
+  instanceSeq: number;
+  isNewEntity: boolean;
+  updatedProps: ReadonlySet<keyof SELF>;
+};

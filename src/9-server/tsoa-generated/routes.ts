@@ -13,10 +13,10 @@ import {
   TsoaResponse,
 } from "@tsoa/runtime";
 // WARNING: This file was auto-generated with tsoa. Please do not modify it. Re-run tsoa to re-generate this file: https://github.com/lukeautry/tsoa
-import { FacilityAPI } from "../api/facility.api";
+import { FacilityAPI } from "../../4-controllers/facility.api";
 // WARNING: This file was auto-generated with tsoa. Please do not modify it. Re-run tsoa to re-generate this file: https://github.com/lukeautry/tsoa
-import { TenantAPI } from "../api/tenant.api";
-import { expressAuthentication } from "../security/authenticator";
+import { TenantAPI } from "../../4-controllers/tenant.api";
+import { tsoaAuthentication } from "../../4-controllers/base/tsoa-authenticator";
 import * as express from "express";
 
 // WARNING: This file was auto-generated with tsoa. Please do not modify it. Re-run tsoa to re-generate this file: https://github.com/lukeautry/tsoa
@@ -380,9 +380,7 @@ export function RegisterRoutes(app: express.Router) {
           let promises: Promise<any>[] = [];
 
           for (const name in secMethod) {
-            promises.push(
-              expressAuthentication(request, name, secMethod[name])
-            );
+            promises.push(tsoaAuthentication(request, name, secMethod[name]));
           }
 
           Promise.all(promises)
@@ -392,7 +390,7 @@ export function RegisterRoutes(app: express.Router) {
             .catch(fail);
         } else {
           for (const name in secMethod) {
-            expressAuthentication(request, name, secMethod[name])
+            tsoaAuthentication(request, name, secMethod[name])
               .then(succeed)
               .catch(fail);
           }

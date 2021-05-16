@@ -9,7 +9,7 @@ import {
   ReadonlyTxProcessor,
 } from "./transaction";
 
-export abstract class BaseTenantService extends BaseService<TenantContext> {
+export abstract class TenantScopedService extends BaseService<TenantContext> {
   static TX_SET: TxSet<TenantContext>;
 
   get tenant(): Tenant {
@@ -25,14 +25,18 @@ export abstract class BaseTenantService extends BaseService<TenantContext> {
    * @see {Transaction}
    */
   protected startTx<R>(func: TxProcessor<R>): Promise<R> {
-    return TypeORMHelper.startTx(BaseTenantService.TX_SET, this, func);
+    return TypeORMHelper.startTx(TenantScopedService.TX_SET, this, func);
   }
 
   /**
    * 読み込み専用 Transaction
    */
   protected startReadonlyTx<R>(func: ReadonlyTxProcessor<R>): Promise<R> {
-    return TypeORMHelper.startReadonlyTx(BaseTenantService.TX_SET, this, func);
+    return TypeORMHelper.startReadonlyTx(
+      TenantScopedService.TX_SET,
+      this,
+      func
+    );
   }
 
   /**

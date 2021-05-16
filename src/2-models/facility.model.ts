@@ -1,13 +1,13 @@
 import { TenantContextHolder } from "./base/tenant-context";
 import { Facility } from "../1-entities/facility.entity";
-import { BaseTenantModel } from "./base/base-tenant-model";
+import { TenantScopedModel } from "./base/tenant-scoped-model";
 
 type D = { facility: Facility };
 
 /**
  * for Facility layer
  */
-export class FacilityModel extends BaseTenantModel<D> {
+export class FacilityModel extends TenantScopedModel<D> {
   static PROVIDER_NAME_REGEX = /^[A-z]{1}[A-z0-9\-_]{0,31}[A-z0-9]{1}$/;
 
   constructor(ch: TenantContextHolder, dependencies: D) {

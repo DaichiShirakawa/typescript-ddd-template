@@ -10,11 +10,11 @@ import {
   Security,
   Tags,
 } from "tsoa";
-import { Tenant } from "../../1-entities/tenant.entity";
-import { TenantService } from "../../3-services/tenant.service";
-import { APIReq, TenantScopedReq } from "../security/console-security";
-import { Scopes, Securities } from "../security/securities";
-import { RegisterTenantReq } from "../interfaces/tenant.if";
+import { Tenant } from "../1-entities/tenant.entity";
+import { TenantService } from "../3-services/tenant.service";
+import { APIReq, TenantScopedReq } from "./base/console-security";
+import { Scopes, Securities } from "./base/securities";
+import { RegisterTenantReq } from "./interfaces/tenant.if";
 
 @Route("/tenants")
 @Tags("01: Tenant")

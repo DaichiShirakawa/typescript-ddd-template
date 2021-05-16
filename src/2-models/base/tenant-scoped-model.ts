@@ -8,7 +8,7 @@ import { TenantContext, TenantContextHolder } from "./tenant-context";
  * Tenant 配下のデータを扱うことに特化した Model
  * TenantContext を保有
  */
-export abstract class BaseTenantModel<
+export abstract class TenantScopedModel<
   D extends ModelDependencies
 > extends BaseModel<TenantContext, D> {
   constructor(ch: TenantContextHolder, dependencies: D) {

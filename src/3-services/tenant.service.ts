@@ -3,9 +3,9 @@ import { Tenant } from "../1-entities/tenant.entity";
 import { TenantModel } from "../2-models/tenant.model";
 import { HttpsError } from "../0-definitions/https-error";
 import { ContextHolder } from "../0-definitions/context";
-import { BaseTenantService } from "./base/base-tenant-service";
+import { TenantScopedService } from "./base/tenant-scoped-service";
 
-export class TenantService extends BaseTenantService {
+export class TenantService extends TenantScopedService {
   list(): Promise<Tenant[]> {
     return this.startReadonlyTxDANGER((tx) => tx.find(Tenant));
   }

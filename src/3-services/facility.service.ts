@@ -1,9 +1,9 @@
 import { TenantModel } from "../2-models/tenant.model";
 import { HttpsError } from "../0-definitions/https-error";
-import { BaseTenantService } from "./base/base-tenant-service";
+import { TenantScopedService } from "./base/tenant-scoped-service";
 import { Facility } from "../1-entities/facility.entity";
 
-export class FacilityService extends BaseTenantService {
+export class FacilityService extends TenantScopedService {
   async list(): Promise<Facility[]> {
     return await this.startReadonlyTx((tx) => tx.find(Facility));
   }

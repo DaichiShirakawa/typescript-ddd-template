@@ -9,16 +9,12 @@
 			"Facility": {
 				"description": "テナントに属する施設",
 				"properties": {
-					"_instanceSeq": {
-						"type": "number",
-						"format": "double",
-						"description": "プロセスに内で生成されたモデルの番号"
-					},
 					"tenantId": {
 						"type": "string"
 					},
 					"id": {
-						"type": "string"
+						"type": "string",
+						"description": "データの一意性を判定するために必ず定義する"
 					},
 					"name": {
 						"type": "string"
@@ -36,7 +32,6 @@
 					}
 				},
 				"required": [
-					"_instanceSeq",
 					"tenantId",
 					"name",
 					"createdAt",
@@ -49,11 +44,6 @@
 			"Tenant": {
 				"description": "テナント(お客様組織)",
 				"properties": {
-					"_instanceSeq": {
-						"type": "number",
-						"format": "double",
-						"description": "プロセスに内で生成されたモデルの番号"
-					},
 					"tenantId": {
 						"type": "string"
 					},
@@ -63,7 +53,7 @@
 					},
 					"code": {
 						"type": "string",
-						"description": "URLの一部などに利用される、開発者が認識しやすい名称\n例: \"srkw\""
+						"description": "URLの一部などに利用される、開発者が認識しやすい名称\n例: \"my-company\""
 					},
 					"createdAt": {
 						"type": "string",
@@ -81,7 +71,6 @@
 					}
 				},
 				"required": [
-					"_instanceSeq",
 					"tenantId",
 					"name",
 					"code",
@@ -115,7 +104,7 @@
 					},
 					"code": {
 						"type": "string",
-						"description": "URLの一部などに利用される、開発者が認識しやすい名称\n例: \"srkw\""
+						"description": "URLの一部などに利用される、開発者が認識しやすい名称\n例: \"my-company\""
 					}
 				},
 				"required": [
@@ -163,7 +152,9 @@
 				],
 				"security": [
 					{
-						"CONSOLE_TENANT": []
+						"CONSOLE": [
+							"TENANT"
+						]
 					}
 				],
 				"parameters": [
@@ -211,7 +202,9 @@
 				],
 				"security": [
 					{
-						"CONSOLE_TENANT": []
+						"CONSOLE": [
+							"TENANT"
+						]
 					}
 				],
 				"parameters": [
@@ -309,7 +302,9 @@
 				],
 				"security": [
 					{
-						"CONSOLE_TENANT": []
+						"CONSOLE": [
+							"TENANT"
+						]
 					}
 				],
 				"parameters": [
@@ -344,7 +339,9 @@
 				],
 				"security": [
 					{
-						"CONSOLE_TENANT": []
+						"CONSOLE": [
+							"TENANT"
+						]
 					}
 				],
 				"parameters": [
@@ -397,7 +394,9 @@
 				],
 				"security": [
 					{
-						"CONSOLE_TENANT": []
+						"CONSOLE": [
+							"TENANT"
+						]
 					}
 				],
 				"parameters": [

@@ -87,7 +87,7 @@ export class TypeORMTx<C extends Context = Context> implements Transaction<C> {
     );
 
     for (const target of savedTargets) {
-      if (target.entity.isNewEntity) {
+      if (target.entity.instanceMeta.isNewEntity) {
         target.savedEntity = await this.insert(target.entity);
       } else {
         target.savedEntity = await this.update(target.entity);

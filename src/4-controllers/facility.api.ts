@@ -9,11 +9,11 @@ import {
   Security,
   Tags,
 } from "tsoa";
-import { Facility } from "../../1-entities/facility.entity";
-import { FacilityService } from "../../3-services/facility.service";
-import { TenantScopedReq } from "../security/console-security";
-import { Scopes, Securities } from "../security/securities";
-import { RegisterFacilityReq } from "../interfaces/facility.if";
+import { Facility } from "../1-entities/facility.entity";
+import { FacilityService } from "../3-services/facility.service";
+import { TenantScopedReq } from "./base/console-security";
+import { Scopes, Securities } from "./base/securities";
+import { RegisterFacilityReq } from "./interfaces/facility.if";
 
 @Route("/tenants/:tenantId/facilities")
 @Tags("02: Facility")

@@ -2,7 +2,7 @@ import { ContextHolder } from "../0-definitions/context";
 import { Facility } from "../1-entities/facility.entity";
 import { Tenant } from "../1-entities/tenant.entity";
 import { HttpsError } from "../0-definitions/https-error";
-import { BaseTenantModel } from "./base/base-tenant-model";
+import { TenantScopedModel } from "./base/tenant-scoped-model";
 import { TenantContext, TenantContextHolder } from "./base/tenant-context";
 import { FacilityModel } from "./facility.model";
 
@@ -14,7 +14,7 @@ type D = {
 /**
  * テナントおよびテナント直下設定を担うモデル
  */
-export class TenantModel extends BaseTenantModel<D> {
+export class TenantModel extends TenantScopedModel<D> {
   static TENANT_CODE_REGEX = /^[a-z0-9\-_]{3,32}$/;
 
   constructor(ch: TenantContextHolder) {

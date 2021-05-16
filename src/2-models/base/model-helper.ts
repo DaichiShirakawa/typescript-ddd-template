@@ -6,7 +6,7 @@ export class ModelHelper {
    * @returns Model の管理下にある全ての Entities
    * Sub Model 配下の Entities も含む
    */
-  static toEntitiesArray(model: BaseModel): MyBaseEntity[] {
+  static toEntitiesArray(model: BaseModel): ReadonlyArray<MyBaseEntity> {
     const result: MyBaseEntity[] = [];
     const dependencies = model.dependencies;
 
@@ -30,6 +30,6 @@ export class ModelHelper {
       }
     }
 
-    return result;
+    return Object.freeze(result);
   }
 }
