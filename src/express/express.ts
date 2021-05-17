@@ -1,11 +1,11 @@
 import cors from "cors";
 import express, { NextFunction, Request, Response } from "express";
 import SwaggerUI from "swagger-ui-express";
-import { APIMiddlewares } from "./helpers/express-middlewares";
-import { RegisterRoutes } from "./tsoa-generated/routes";
-import swaggerJson from "./tsoa-generated/swagger.json";
 import { initializeTransaction } from "../4-infrastructure/helpers/initialize-transaction";
 import { initializeTypeORM } from "../4-infrastructure/helpers/initialize-typeorm";
+import { APIMiddlewares } from "./helpers/express-middlewares";
+import { RegisterRoutes } from "./tsoa-generated/express-routes";
+import swaggerJson from "./tsoa-generated/swagger.json";
 
 const app = express();
 
