@@ -1,6 +1,6 @@
 import { NextFunction, Request, Response } from "express";
 import { ValidateError } from "tsoa";
-import { HttpsError } from "../../0-definitions/https-error";
+import { HttpsError } from "../../0-base/https-error";
 
 export class APIMiddlewares {
   static requestLogger(req: Request, res: Response, next: NextFunction) {

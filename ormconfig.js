@@ -19,11 +19,11 @@ module.exports = {
   },
   extra: {
     ssl: {
-      // cert: fs.readFileSync(
-      //   __dirname + "/typeorm/develop_keys/client-cert.pem"
-      // ),
-      // key: fs.readFileSync(__dirname + "/typeorm/develop_keys/client-key.pem"),
-      // ca: fs.readFileSync(__dirname + "/typeorm/develop_keys/server-ca.pem"),
+      cert: fs.readFileSync(
+        __dirname + "/typeorm/develop_keys/client-cert.pem"
+      ),
+      key: fs.readFileSync(__dirname + "/typeorm/develop_keys/client-key.pem"),
+      ca: fs.readFileSync(__dirname + "/typeorm/develop_keys/server-ca.pem"),
     },
   },
 };

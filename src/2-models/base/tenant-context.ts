@@ -1,6 +1,6 @@
 import { Tenant } from "../../1-entities/tenant.entity";
-import { HttpsError } from "../../0-definitions/https-error";
-import { Context, ContextHolder } from "../../0-definitions/context";
+import { HttpsError } from "../../0-base/https-error";
+import { Context, ContextHolder } from "../../0-base/context";
 
 /**
  * 特定テナントに関する操作のコンテキスト

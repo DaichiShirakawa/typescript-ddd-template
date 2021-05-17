@@ -4,8 +4,8 @@ import {
   FindManyOptions,
   getConnection,
 } from "typeorm";
-import { Context, ContextHolder } from "../../0-definitions/context";
-import { HttpsError } from "../../0-definitions/https-error";
+import { Context, ContextHolder } from "../../0-base/context";
+import { HttpsError } from "../../0-base/https-error";
 import { MyBaseEntity } from "../../1-entities/base/base-entity";
 import {
   ReadonlyTxProcessor,

@@ -1,4 +1,4 @@
-import { Context, ContextHolder } from "../../0-definitions/context";
+import { Context, ContextHolder } from "../../0-base/context";
 import { DUMMY_TX_STARTERS } from "./dummy-tx";
 import {
   ReadonlyTxProcessor,

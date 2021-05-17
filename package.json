@@ -1,7 +1,7 @@
 {
-  "name": "srkw-ddd-template",
+  "name": "typescript-ddd-template",
   "version": "0.1.0",
-  "description": "",
+  "description": "ドメイン駆動ベースのサーバーサイドフレーム",
   "author": "Daichi Shirakawa",
   "engines": {
     "node": "14.x"

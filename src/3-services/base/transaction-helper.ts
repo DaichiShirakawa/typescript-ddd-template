@@ -1,6 +1,6 @@
 import { getRepository, FindConditions, getConnection } from "typeorm";
 import { QueryDeepPartialEntity } from "typeorm/query-builder/QueryPartialEntity";
-import { HttpsError } from "../../0-definitions/https-error";
+import { HttpsError } from "../../0-base/https-error";
 import { MyBaseEntity } from "../../1-entities/base/base-entity";
 import { BaseModel } from "../../2-models/base/base-model";
 import { SaveTarget, SavedTarget } from "./transaction";

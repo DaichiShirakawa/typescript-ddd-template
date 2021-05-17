@@ -1,7 +1,7 @@
-import { ContextHolder } from "../0-definitions/context";
+import { ContextHolder } from "../0-base/context";
 import { Facility } from "../1-entities/facility.entity";
 import { Tenant } from "../1-entities/tenant.entity";
-import { HttpsError } from "../0-definitions/https-error";
+import { HttpsError } from "../0-base/https-error";
 import { TenantScopedModel } from "./base/tenant-scoped-model";
 import { TenantContext, TenantContextHolder } from "./base/tenant-context";
 import { FacilityModel } from "./facility.model";

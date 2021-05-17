@@ -1,6 +1,6 @@
 import { EntityTarget, FindManyOptions } from "typeorm";
 import { MyBaseEntity } from "../../1-entities/base/base-entity";
-import { ContextHolder } from "../../0-definitions/context";
+import { ContextHolder } from "../../0-base/context";
 import { TxProcessor, ReadonlyTxProcessor } from "./transaction";
 import {
   SavedTarget,

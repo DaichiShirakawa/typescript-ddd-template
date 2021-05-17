@@ -1,4 +1,4 @@
-import "./0-definitions/env-def";
-import { ExpressApp } from "./9-server/express";
+import "./0-base/env-def";
+import { ExpressApp } from "./express/express";
 
 export const api = ExpressApp;

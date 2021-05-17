@@ -6,7 +6,7 @@ import {
   getRepository,
   ObjectLiteral,
 } from "typeorm";
-import { HttpsError } from "../../0-definitions/https-error";
+import { HttpsError } from "../../0-base/https-error";
 import { MyBaseEntity } from "../../1-entities/base/base-entity";
 import { TenantScopedEntity } from "../../1-entities/base/tenant-scoped-entity";
 import {

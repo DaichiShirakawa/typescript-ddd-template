@@ -13,10 +13,10 @@ import {
   TsoaResponse,
 } from "@tsoa/runtime";
 // WARNING: This file was auto-generated with tsoa. Please do not modify it. Re-run tsoa to re-generate this file: https://github.com/lukeautry/tsoa
-import { FacilityAPI } from "../../4-controllers/facility.api";
+import { FacilityAPI } from "../../4-presentation/facility.api";
 // WARNING: This file was auto-generated with tsoa. Please do not modify it. Re-run tsoa to re-generate this file: https://github.com/lukeautry/tsoa
-import { TenantAPI } from "../../4-controllers/tenant.api";
-import { tsoaAuthentication } from "../../4-controllers/base/tsoa-authenticator";
+import { TenantAPI } from "../../4-presentation/tenant.api";
+import { tsoaAuthentication } from "../../4-presentation/base/tsoa-authenticator";
 import * as express from "express";
 
 // WARNING: This file was auto-generated with tsoa. Please do not modify it. Re-run tsoa to re-generate this file: https://github.com/lukeautry/tsoa

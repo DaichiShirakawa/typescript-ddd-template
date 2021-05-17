@@ -4,8 +4,8 @@ import SwaggerUI from "swagger-ui-express";
 import { APIMiddlewares } from "./helpers/express-middlewares";
 import { RegisterRoutes } from "./tsoa-generated/routes";
 import swaggerJson from "./tsoa-generated/swagger.json";
-import { initializeTransaction } from "../5-infrastructure/helpers/initialize-transaction";
-import { initializeTypeORM } from "../5-infrastructure/helpers/initialize-typeorm";
+import { initializeTransaction } from "../4-infrastructure/helpers/initialize-transaction";
+import { initializeTypeORM } from "../4-infrastructure/helpers/initialize-typeorm";
 
 const app = express();
 

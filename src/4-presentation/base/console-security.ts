@@ -1,6 +1,6 @@
 import { Request } from "express";
 import { getRepository } from "typeorm";
-import { ContextHolder } from "../../0-definitions/context";
+import { ContextHolder } from "../../0-base/context";
 import { Tenant } from "../../1-entities/tenant.entity";
 import {
   TenantContext,

@@ -1,5 +1,5 @@
 import { TenantModel } from "../2-models/tenant.model";
-import { HttpsError } from "../0-definitions/https-error";
+import { HttpsError } from "../0-base/https-error";
 import { TenantScopedService } from "./base/tenant-scoped-service";
 import { Facility } from "../1-entities/facility.entity";
 

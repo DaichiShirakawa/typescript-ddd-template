@@ -1,5 +1,5 @@
 import { Tenant } from "../../1-entities/tenant.entity";
-import { HttpsError } from "../../0-definitions/https-error";
+import { HttpsError } from "../../0-base/https-error";
 import { BaseModel, ModelDependencies } from "./base-model";
 import { ModelHelper } from "./model-helper";
 import { TenantContext, TenantContextHolder } from "./tenant-context";

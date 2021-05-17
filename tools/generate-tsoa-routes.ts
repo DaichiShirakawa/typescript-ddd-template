@@ -7,12 +7,12 @@ import {
 } from "tsoa";
 
 (async () => {
-  const outputDirectory = `src/9-server/tsoa-generated`;
+  const outputDirectory = `src/express/tsoa-generated`;
   const routesFileName = `express-routes.ts`;
 
   const entryFile = `src/functions.index.ts`;
   const controllerPathGlobs = [`src/**/*.api.ts`];
-  const authenticationModule = `src/4-controllers/base/authenticator.ts`;
+  const authenticationModule = `src/4-presentation/base/authenticator.ts`;
 
   const swaggerOpts: ExtendedSpecConfig = {
     schemes: ["http", "https"],

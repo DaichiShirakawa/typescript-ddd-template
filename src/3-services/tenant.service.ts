@@ -1,8 +1,8 @@
 import { getConnection } from "typeorm";
 import { Tenant } from "../1-entities/tenant.entity";
 import { TenantModel } from "../2-models/tenant.model";
-import { HttpsError } from "../0-definitions/https-error";
-import { ContextHolder } from "../0-definitions/context";
+import { HttpsError } from "../0-base/https-error";
+import { ContextHolder } from "../0-base/context";
 import { TenantScopedService } from "./base/tenant-scoped-service";
 
 export class TenantService extends TenantScopedService {
