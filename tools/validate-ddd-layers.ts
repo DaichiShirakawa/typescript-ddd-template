@@ -117,7 +117,9 @@ const violations = result.filter((e) => 0 < e.self.violations.length);
 
 console.log(`
 -----
-${violations.length} Violations found / ${result.length} all files
+${violations.length ? "❌" : "✅"} ${violations.length} Violations found / ${
+  result.length
+} files
 -----
 ${violations
   .map(
