@@ -6,7 +6,7 @@ TypeScript でレイヤ間疎結合を意識したドメイン駆動開発して
   - ER 図自動生成
   - Swagger.json 自動生成
 - オニオンアーキテクチャを参考にしている
-  - 詳しくは [DDD](##DDD) で
+  - 詳しくは [DDD](#ddd) で
 - Tenant-scoped な制御実装している
   - Tenant = 顧客(例えばユーザーとなる会社)の単位
   - Tenant-scoped = ある Tenant のコンテキストからは他の Tenant のデータは隠蔽される
@@ -131,7 +131,7 @@ Presentation の定義をもとに `src/express/tsoa-generated`を自動生成
 
 ### validate-ddd-layers
 
-[Layer-rules](###Layer-rules) の違反を検出する
+[Layer-rules](#layer-rules) の違反を検出する
 
 ## Connect to DB
 
