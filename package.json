@@ -3,6 +3,7 @@
   "version": "0.1.0",
   "description": "ドメイン駆動ベースのサーバーサイドフレーム",
   "author": "Daichi Shirakawa",
+  "license": "MIT",
   "engines": {
     "node": "14.x"
   },
