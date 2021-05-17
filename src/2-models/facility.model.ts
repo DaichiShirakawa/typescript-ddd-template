@@ -8,7 +8,7 @@ type D = { facility: Facility };
  * for Facility layer
  */
 export class FacilityModel extends TenantScopedModel<D> {
-  static PROVIDER_NAME_REGEX = /^[A-z]{1}[A-z0-9\-_]{0,31}[A-z0-9]{1}$/;
+  static FACILITY_NAME = /^[A-z]{1}[A-z0-9\-_]{0,31}[A-z0-9]{1}$/;
 
   constructor(ch: TenantContextHolder, dependencies: D) {
     super(ch, { ...dependencies });

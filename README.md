@@ -3,8 +3,8 @@
 TypeScript でレイヤ間疎結合を意識したドメイン駆動開発してみたので、テンプレートとして公開する。
 
 - 実装 to ドキュメントができる作りにしている
-  - ER 図自動生成
-  - Swagger.json 自動生成
+  - [ER 図](documents/er-diagram.md)自動生成
+  - [Swagger.json](src/express/tsoa-generated/swagger.json) 自動生成
 - オニオンアーキテクチャを参考にしている
   - 詳しくは [DDD](#ddd) で
 - Tenant-scoped な制御実装している
@@ -120,7 +120,7 @@ Transaction の実装
 
 ### generate-er-diagram
 
-Entities の定義をもとに `documents/er-diagram.md` を自動生成
+Entities の定義をもとに [`documents/er-diagram.md`](documents/er-diagram.md) を自動生成
 
 ### generate-tsoa-routes
 
