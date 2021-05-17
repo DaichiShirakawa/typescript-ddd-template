@@ -41,7 +41,7 @@ npm run test:debug
 ## DDD
 
 - ライトなオニオンアーキテクチャ
-- `src/` 以下ディレクトリの prefix (0~4) がレイヤの位置を示している
+- `src/` 以下ディレクトリの prefix (0~4) がレイヤのレベルを示している
 - 完全なレイヤ間疎結合ではない
   - TypeORM を使って Entity を定義している
     - テーブル設計の内容やリレーションが Entity レイヤで記述されている
@@ -101,7 +101,7 @@ Transaction の実装
 
 - TypeORM x MySQL
 
-#### 5-presentation
+#### 4-presentation
 
 いわゆる Controller 層、API の定義
 
