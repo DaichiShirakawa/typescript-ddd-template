@@ -30,7 +30,7 @@ npm run test:debug
   - Entity の定義
     - 兼 テーブル定義 / リレーション定義
   - DB へのアクセス (本プロジェクトでは MySQL を想定)
-- [typeorm-uml]
+- [typeorm-uml](https://github.com/eugene-manuilov/typeorm-uml)
   - TypeORM で記述した Entities を PlantUML-ERDiagram に書き起こす
 - [Express](https://expressjs.com/ja/)
 - [tsoa](https://tsoa-community.github.io/docs/)
