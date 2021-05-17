@@ -1,22 +1,11 @@
-import {
-  EntityManager,
-  FindConditions,
-  getConnection,
-  getRepository,
-} from "typeorm";
+import { getRepository, FindConditions, getConnection } from "typeorm";
 import { QueryDeepPartialEntity } from "typeorm/query-builder/QueryPartialEntity";
-import { Context, ContextHolder } from "../../0-definitions/context";
 import { HttpsError } from "../../0-definitions/https-error";
 import { MyBaseEntity } from "../../1-entities/base/base-entity";
 import { BaseModel } from "../../2-models/base/base-model";
-import {
-  ReadonlyTxProcessor,
-  SavedTarget,
-  SaveTarget,
-  Transaction,
-} from "../../3-services/base/transaction";
+import { SaveTarget, SavedTarget } from "./transaction";
 
-export class TypeORMHelper {
+export class TransactionHelper {
   /**
    * Save すべきプロパティに絞ったオブジェクトを返す
    *
@@ -43,31 +32,6 @@ export class TypeORMHelper {
     }
 
     return result;
-  }
-
-  /**
-   * models 管理下にあるすべての entities を Save したあとに returns() の結果を返す
-   */
-  static async startReadonlyTx<C extends Context, R>(
-    txClass: new (tx: EntityManager, ch: ContextHolder<C>) => Transaction,
-    ch: ContextHolder<C>,
-    func: ReadonlyTxProcessor<R>
-  ): Promise<R> {
-    const qr = getConnection().createQueryRunner();
-    try {
-      console.error(`Start ${txClass.constructor.name}`);
-      await qr.startTransaction();
-      const tx = new txClass(qr.manager, ch);
-      const result = await func(tx);
-
-      console.error(`Finish ${txClass.constructor.name}`);
-      return result ? result : (undefined as any);
-    } catch (e) {
-      console.error(`Error on ${txClass.constructor.name}`);
-      throw e;
-    } finally {
-      await qr.rollbackTransaction().catch();
-    }
   }
 
   /**
@@ -98,7 +62,7 @@ export class TypeORMHelper {
       arrayIndex?: number
     ) => {
       if (data instanceof BaseModel) {
-        result.push(...TypeORMHelper.toSaveTargets(data));
+        result.push(...TransactionHelper.toSaveTargets(data));
       } else if (data instanceof MyBaseEntity) {
         result.push({
           model: model,
@@ -133,7 +97,7 @@ export class TypeORMHelper {
     }
 
     const duplicates = Object.entries(map).filter(
-      ([target]) => 2 <= target.length
+      ([, target]) => 2 <= target.length
     );
 
     if (duplicates.length === 0) return;

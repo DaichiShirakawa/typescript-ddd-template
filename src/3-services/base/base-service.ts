@@ -4,7 +4,7 @@ import {
   ReadonlyTxProcessor,
   Transaction,
   TxProcessor,
-  TxStarters as TxStarters,
+  TxStarters,
 } from "./transaction";
 
 /**

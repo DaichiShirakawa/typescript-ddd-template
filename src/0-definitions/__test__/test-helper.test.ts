@@ -2,7 +2,6 @@ import { DateTime } from "luxon";
 
 export class TestHelper {
   static timeKey(prefix: string = "") {
-    prefix = prefix ? prefix + "_" : prefix;
     return prefix + DateTime.now().toFormat("yyyyMMddHHmmss");
   }
 
@@ -10,3 +9,8 @@ export class TestHelper {
     await new Promise((resolve) => setTimeout(resolve, wait_ms));
   }
 }
+
+test("TestHelper", () => {
+  expect(TestHelper.timeKey("prefix_")).toMatch(/prefix_\d{14}/);
+  expect(TestHelper.wait(1000)).toBeInstanceOf(Promise);
+});

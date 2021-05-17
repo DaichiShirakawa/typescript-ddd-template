@@ -27,7 +27,7 @@ export abstract class BaseModel<
   }
 
   get dependencies(): Readonly<D> {
-    return Object.freeze(this.dependencies);
+    return Object.freeze({ ...this._dependencies });
   }
 
   /**
@@ -69,7 +69,7 @@ export abstract class BaseModel<
 
     if (
       before?.constructor?.name !== updated.constructor.name ||
-      before?.id !== updated.constructor.name
+      before?.id !== updated.id
     ) {
       throw new HttpsError("internal", `Update Entity not matched`, {
         before,

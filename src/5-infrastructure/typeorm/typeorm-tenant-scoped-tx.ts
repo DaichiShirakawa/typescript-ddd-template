@@ -14,8 +14,8 @@ import {
   TenantContextHolder,
 } from "../../2-models/base/tenant-context";
 import {
-  TxProcessor,
   ReadonlyTxProcessor,
+  TxProcessor,
 } from "../../3-services/base/transaction";
 import { TypeORMTx } from "./typeorm-tx";
 

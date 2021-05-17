@@ -1,7 +1,6 @@
 import { Tenant } from "../../1-entities/tenant.entity";
 import { TenantContext } from "../../2-models/base/tenant-context";
 import { BaseService } from "./base-service";
-import { TypeORMHelper } from "../../5-infrastructure/typeorm/typeorm-helper";
 import {
   Transaction,
   TxProcessor,

@@ -11,7 +11,7 @@ import {
 
 export class DummyTx extends Transaction {
   static async startTx<R>(ch: ContextHolder, func: TxProcessor<R>): Promise<R> {
-    console.error(`Start ${DummyTx.constructor.name}`);
+    console.log(`Start ${DummyTx.constructor.name}`);
     const tx = new DummyTx(ch, false);
     const result = await func(tx);
     return result.returns ? result.returns() : (null as any);
@@ -21,7 +21,7 @@ export class DummyTx extends Transaction {
     ch: ContextHolder,
     func: ReadonlyTxProcessor<R>
   ): Promise<R> {
-    console.error(`Start READONLY ${DummyTx.constructor.name}`);
+    console.log(`Start READONLY ${DummyTx.constructor.name}`);
     const tx = new DummyTx(ch, true);
     const result = await func(tx);
     return result;

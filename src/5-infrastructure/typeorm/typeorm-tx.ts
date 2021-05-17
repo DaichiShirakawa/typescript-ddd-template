@@ -4,17 +4,15 @@ import {
   FindManyOptions,
   getConnection,
 } from "typeorm";
+import { Context, ContextHolder } from "../../0-definitions/context";
+import { HttpsError } from "../../0-definitions/https-error";
 import { MyBaseEntity } from "../../1-entities/base/base-entity";
 import {
-  SavedTarget,
-  SaveTarget,
+  ReadonlyTxProcessor,
   Transaction,
   TxProcessor,
 } from "../../3-services/base/transaction";
-import { HttpsError } from "../../0-definitions/https-error";
-import { Context, ContextHolder } from "../../0-definitions/context";
-import { TypeORMHelper } from "./typeorm-helper";
-import { ReadonlyTxProcessor } from "../../3-services/base/transaction";
+import { TransactionHelper } from "../../3-services/base/transaction-helper";
 
 /**
  * TypeORM のトランザクション(EntityManager) を拡張した Transaction です。
@@ -37,39 +35,32 @@ export class TypeORMTx<C extends Context = Context> extends Transaction<C> {
   static async startTx<R>(
     ch: ContextHolder,
     func: TxProcessor<R>,
-    txClass: new (
-      ch: ContextHolder,
-      isReadonly: boolean,
-      tx: EntityManager
-    ) => TypeORMTx = TypeORMTx
+    txOrTxClass:
+      | Transaction
+      | (new (
+          ch: ContextHolder,
+          isReadonly: boolean,
+          tx: EntityManager
+        ) => TypeORMTx) = TypeORMTx
   ): Promise<R> {
     const qr = getConnection().createQueryRunner();
     try {
-      console.error(`Start ${txClass.constructor.name}`);
+      console.log(`Start ${txOrTxClass.constructor.name}`);
       await qr.startTransaction();
-      const tx = new txClass(ch, false, qr.manager);
-      const result = await func(tx);
 
-      const saveTargets = result.saveModels.flatMap((model) =>
-        TypeORMHelper.toSaveTargets(model)
-      );
+      const tx =
+        txOrTxClass instanceof Transaction
+          ? txOrTxClass
+          : new txOrTxClass(ch, false, qr.manager);
 
-      TypeORMHelper.checkDuplicate(saveTargets);
+      const result = await super.startTx(ch, func, tx, async () => {
+        console.log(`Commit ${txOrTxClass.constructor.name}`);
+        await qr.commitTransaction();
+      });
 
-      const savedTargets = await tx.save(saveTargets);
-
-      if (result.statistics) {
-        result.statistics({ savedTargets });
-      }
-
-      console.error(`Commit ${txClass.constructor.name}`);
-      await qr.commitTransaction();
-
-      TypeORMHelper.updateDependencies(savedTargets);
-
-      return result.returns ? result.returns() : (null as any);
+      return result;
     } catch (e) {
-      console.error(`Rollback ${txClass.constructor.name}`);
+      console.log(`Rollback ${txOrTxClass.constructor.name}`);
       await qr.rollbackTransaction().catch();
       throw e;
     }
@@ -81,24 +72,30 @@ export class TypeORMTx<C extends Context = Context> extends Transaction<C> {
   static async startReadonlyTx<R>(
     ch: ContextHolder,
     func: ReadonlyTxProcessor<R>,
-    txClass: new (
-      ch: ContextHolder,
-      isReadonly: boolean,
-      tx: EntityManager
-    ) => TypeORMTx = TypeORMTx
+    txOrTxClass:
+      | Transaction
+      | (new (
+          ch: ContextHolder,
+          isReadonly: boolean,
+          tx: EntityManager
+        ) => TypeORMTx) = TypeORMTx
   ): Promise<R> {
     const qr = getConnection().createQueryRunner();
     try {
-      console.error(`Start READONLY ${txClass.constructor.name}`);
-      await qr.startTransaction();
-      const tx = new txClass(ch, true, qr.manager);
-      const result = await func(tx);
+      console.log(`Start READONLY ${txOrTxClass.constructor.name}`);
 
-      return result;
+      await qr.startTransaction();
+
+      const tx =
+        txOrTxClass instanceof Transaction
+          ? txOrTxClass
+          : new txOrTxClass(ch, true, qr.manager);
+
+      return super.startReadonlyTx(ch, func, tx);
     } catch (e) {
       throw e;
     } finally {
-      console.error(`Rollback READONLY ${txClass.constructor.name}`);
+      console.log(`Rollback READONLY ${txOrTxClass.constructor.name}`);
       await qr.rollbackTransaction().catch();
     }
   }
@@ -110,10 +107,10 @@ export class TypeORMTx<C extends Context = Context> extends Transaction<C> {
     if (this.isReadonly) {
       throw new HttpsError("internal", `Read only transaction`);
     }
-    const saveEntity = TypeORMHelper.asSaveEntity(entity);
+    const saveEntity = TransactionHelper.asSaveEntity(entity);
     await this.tx.insert(entity.constructor, saveEntity);
     return await this.tx.findOneOrFail(entity.constructor, {
-      where: TypeORMHelper.toPrimaryWhere(entity),
+      where: TransactionHelper.toPrimaryWhere(entity),
     });
   }
 
@@ -124,8 +121,8 @@ export class TypeORMTx<C extends Context = Context> extends Transaction<C> {
     if (this.isReadonly) {
       throw new HttpsError("internal", `Read only transaction`);
     }
-    const saveEntity = TypeORMHelper.asSaveEntity(entity);
-    const where = TypeORMHelper.toPrimaryWhere(entity);
+    const saveEntity = TransactionHelper.asSaveEntity(entity);
+    const where = TransactionHelper.toPrimaryWhere(entity);
     await this.tx.update(entity.constructor, where, saveEntity);
     return await this.tx.findOneOrFail(entity.constructor, { where });
   }
@@ -162,25 +159,5 @@ export class TypeORMTx<C extends Context = Context> extends Transaction<C> {
       );
     }
     return data;
-  }
-
-  async save(targets: SaveTarget[]): Promise<SavedTarget[]> {
-    if (this.isReadonly) {
-      throw new HttpsError("internal", `Read only transaction`);
-    }
-
-    const savedTargets: SavedTarget[] = [...(targets as any)].sort(
-      (a, b) => a.entity.txSeq - b.entity.txSeq
-    );
-
-    for (const target of savedTargets) {
-      if (target.entity.instanceMeta.isNewEntity) {
-        target.savedEntity = await this.insert(target.entity);
-      } else {
-        target.savedEntity = await this.update(target.entity);
-      }
-    }
-
-    return savedTargets;
   }
 }

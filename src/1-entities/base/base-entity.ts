@@ -1,4 +1,5 @@
 import cloneDeep from "lodash/cloneDeep";
+import { initializeTransaction } from "../../5-infrastructure/helpers/initialize-transaction";
 
 /**
  * TypeORM エンティティはすべてこれを継承する
@@ -7,7 +8,7 @@ import cloneDeep from "lodash/cloneDeep";
 export abstract class MyBaseEntity<SELF extends MyBaseEntity = any> {
   static CURRENT_INSTANCE_SEQ = 1;
 
-  private readonly _entityMeta: EntityInstanceMeta<SELF>;
+  private readonly _instanceMeta: EntityInstanceMeta<SELF>;
 
   /**
    * - 新しく生成されたエンティティデータであるか
@@ -15,7 +16,7 @@ export abstract class MyBaseEntity<SELF extends MyBaseEntity = any> {
    * - インスタンス連番 (clone による前後関係を表現するためのもの)
    */
   get instanceMeta() {
-    return this._entityMeta;
+    return Object.freeze(this._instanceMeta);
   }
 
   /**
@@ -33,7 +34,7 @@ export abstract class MyBaseEntity<SELF extends MyBaseEntity = any> {
   public constructor(init: Partial<SELF>) {
     Object.assign(this, init);
 
-    this._entityMeta = {
+    this._instanceMeta = {
       instanceSeq: MyBaseEntity.CURRENT_INSTANCE_SEQ++,
       // TypeORM から生成の場合 init==null
       isNewEntity: init != null,
@@ -62,9 +63,10 @@ export abstract class MyBaseEntity<SELF extends MyBaseEntity = any> {
     Object.assign(clone, {
       ...changes,
       _instanceMeta: {
-        ...clone._entityMeta,
+        instanceSeq: MyBaseEntity.CURRENT_INSTANCE_SEQ++,
+        isNewEntity: this.instanceMeta.isNewEntity,
         updatedProps: new Set([
-          ...clone._entityMeta.updatedProps,
+          ...clone._instanceMeta.updatedProps,
           ...Object.keys(changes),
         ]),
       },
