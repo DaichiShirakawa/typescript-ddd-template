@@ -63,6 +63,8 @@ export class TypeORMTx<C extends Context = Context> extends Transaction<C> {
       console.log(`Rollback ${txOrTxClass.constructor.name}`);
       await qr.rollbackTransaction().catch();
       throw e;
+    } finally {
+      await qr.release().catch();
     }
   }
 
@@ -97,6 +99,7 @@ export class TypeORMTx<C extends Context = Context> extends Transaction<C> {
     } finally {
       console.log(`Rollback READONLY ${txOrTxClass.constructor.name}`);
       await qr.rollbackTransaction().catch();
+      await qr.release().catch();
     }
   }
 

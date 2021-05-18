@@ -9,19 +9,18 @@ import { HttpsError } from "./https-error";
  * 2. その文脈の根拠となる文脈 (source)
  *    (例): その根拠は特定の HTTP リクエストである
  */
-export abstract class Context<DATASET = {}> {
+export abstract class Context<DATASET = {}> implements ContextHolder {
   protected readonly dataset: DATASET;
   private readonly _source?: Context;
 
-  constructor(dataset: DATASET & { source?: ContextHolder | Context }) {
-    const { source } = dataset;
-
-    if (source) {
-      this._source = source instanceof Context ? source : source.context;
-    }
-
+  constructor(dataset: DATASET & { source?: ContextHolder }) {
+    this._source = dataset.source?.context;
     this.dataset = { ...dataset };
     delete (this.dataset as any).source;
+  }
+
+  get context() {
+    return this;
   }
 
   public get hasSource() {
