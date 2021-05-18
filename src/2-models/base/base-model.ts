@@ -1,9 +1,12 @@
-import { MyBaseEntity } from "../../1-entities/base/base-entity";
 import { Context, ContextHolder } from "../../0-base/context";
 import { HttpsError } from "../../0-base/https-error";
+import { ArrayElement, NonArrayElement } from "../../0-base/type-helper";
+import { MyBaseEntity } from "../../1-entities/base/base-entity";
 
+export type ModelDependency = MyBaseEntity | BaseModel;
+export type ModelArrayDependency = ReadonlyArray<ModelDependency>;
 export type ModelDependencies = {
-  [name: string]: MyBaseEntity | MyBaseEntity[] | BaseModel | BaseModel[];
+  [name: string]: undefined | ModelDependency | ModelArrayDependency;
 };
 
 /**
@@ -20,6 +23,11 @@ export abstract class BaseModel<
 {
   readonly context: C;
   private readonly _dependencies: D = {} as any;
+  /**
+   * Model が一意に定まるIDを返す
+   * (メインの Entity.id など)
+   */
+  abstract id: string;
 
   constructor(ch: ContextHolder<C>, dependencies: D) {
     this.context = ch.context;
@@ -31,14 +39,93 @@ export abstract class BaseModel<
   }
 
   /**
-   * Dependencies の内容はここを通じてしか変更できません
-   * @param name 変更したい Dependency の名前
+   * undefined な Dependency をセットできる
+   * @param key
+   * @param data
+   */
+  protected set<K extends keyof D>(key: K, data: NonArrayElement<D[K]>) {
+    const current = this._dependencies[key];
+    if (current != null) {
+      throw new HttpsError(
+        "internal",
+        `Can not set non-null dependency: "${key}"`
+      );
+    }
+    this._dependencies[key] = data;
+  }
+
+  /**
+   * ArrayDependency に要素を追加することができる
+   * @param data 追加したい要素
+   */
+  protected add<K extends keyof D>(key: K, data: ArrayElement<D[K]>) {
+    const current = this._dependencies[key];
+    if (!Array.isArray(current)) {
+      throw new HttpsError(
+        "internal",
+        `Can not add data to non-Array dependency`
+      );
+    }
+
+    if (current.some((e) => e.id === data.id)) {
+      throw new HttpsError("internal", `${data.id} already exists in ${key}`);
+    }
+
+    if (current[0] && current[0].constructor.name !== data.constructor.name) {
+      throw new HttpsError("internal", `Data type not matched`, {
+        currentFirstElementType: current[0].constructor.name,
+        dataType: data.constructor.name,
+      });
+    }
+
+    const next = [...current];
+    next.push(data);
+    (this._dependencies as any)[key] = next;
+  }
+
+  /**
+   * key を自動判別して特定の Dependency を更新する
+   * ArrayDependency の内容も更新可能
+   *
    * @param updated 新しい値
    */
-  protected update<K extends keyof D>(name: K, updated: D[K]): D[K] {
-    this._dependencies[name] = updated;
-    return updated;
+  protected update(updated: ModelDependency): void {
+    for (const [key, value] of Object.entries(this._dependencies)) {
+      if (Array.isArray(value)) {
+        for (let i = 0; i < value.length; i++) {
+          if (this.setIfMatched(key, i, value[i], updated)) return;
+        }
+      } else {
+        if (this.setIfMatched(key, -1, value as ModelDependency, updated))
+          return;
+      }
+    }
+
+    throw new HttpsError(`internal`, `Dependency of ${updated.id} not found`);
   }
+
+  private setIfMatched = (
+    key: string,
+    arrayIndex: number,
+    current: ModelDependency,
+    updated: ModelDependency
+  ): boolean => {
+    if (
+      ((current instanceof MyBaseEntity && updated instanceof MyBaseEntity) ||
+        (current instanceof BaseModel && updated instanceof BaseModel)) &&
+      current.id === updated.id
+    ) {
+      if (0 <= arrayIndex) {
+        const arr = [...(this._dependencies as any)[key]];
+        arr[arrayIndex] = updated;
+        (this._dependencies as any)[key] = arr;
+      } else {
+        (this._dependencies as any)[key] = updated as any;
+      }
+      return true;
+    }
+    return false;
+  };
 
   /**
    * Transaction による保存済みのデータを Dependencies へ反映
@@ -46,42 +133,7 @@ export abstract class BaseModel<
    *
    * @deprecated 本来公開すべきではないが、 Transaction から限定で呼ぶことを許可する
    */
-  dangerUpdateFromTransaction(
-    name: string,
-    updated: MyBaseEntity,
-    arrayIndex?: number
-  ) {
-    let arr = null;
-    let before = this._dependencies[name];
-
-    if (arrayIndex) {
-      arr = before;
-      before = ((arr as any) || [])[arrayIndex];
-    }
-
-    if (!(before instanceof MyBaseEntity)) {
-      throw new HttpsError("internal", `Before data is not Entity`, {
-        name,
-        arrayIndex,
-        before,
-      });
-    }
-
-    if (
-      before?.constructor?.name !== updated.constructor.name ||
-      before?.id !== updated.id
-    ) {
-      throw new HttpsError("internal", `Update Entity not matched`, {
-        before,
-        updated,
-      });
-    }
-
-    if (arrayIndex) {
-      (arr as any[])[arrayIndex] = updated;
-      (this._dependencies as any)[name] = arr;
-    } else {
-      (this._dependencies as any)[name] = updated;
-    }
+  dangerUpdateFromTransaction(updated: MyBaseEntity) {
+    this.update(updated);
   }
 }

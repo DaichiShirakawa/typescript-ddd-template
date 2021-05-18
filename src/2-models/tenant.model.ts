@@ -30,6 +30,10 @@ export class TenantModel extends TenantScopedModel<D> {
     });
   }
 
+  get id() {
+    return this.tenantId;
+  }
+
   static register(ch: ContextHolder, init: Pick<Tenant, "name" | "code">) {
     const tenant = new Tenant(init);
     const context = new TenantContext({ source: ch, tenant });
@@ -40,13 +44,13 @@ export class TenantModel extends TenantScopedModel<D> {
 
   updateName(name: string) {
     const { tenant } = this.dependencies;
-    this.update("tenant", tenant.set({ name }));
+    this.update(tenant.set({ name }));
     return this;
   }
 
   updateCode(code: string) {
     const { tenant } = this.dependencies;
-    this.update("tenant", tenant.set({ code }));
+    this.update(tenant.set({ code }));
     this.validateCode();
     return this;
   }
@@ -64,7 +68,7 @@ export class TenantModel extends TenantScopedModel<D> {
   addFacility(init: Pick<Facility, "name">) {
     const { facilityModels } = this.dependencies;
     const added = FacilityModel.register(this, init);
-    this.update("facilityModels", [...facilityModels, added]);
+    this.add("facilityModels", added);
     return added;
   }
 }

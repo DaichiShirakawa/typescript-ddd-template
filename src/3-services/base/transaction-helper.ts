@@ -119,11 +119,7 @@ export class TransactionHelper {
    */
   static updateDependencies(savedTargets: SavedTarget[]) {
     for (const target of savedTargets) {
-      target.model.dangerUpdateFromTransaction(
-        target.dependencyName,
-        target.savedEntity,
-        target.dependencyArrayIndex
-      );
+      target.model.dangerUpdateFromTransaction(target.savedEntity);
     }
   }
 }

@@ -1,4 +1,4 @@
-import { TestContext } from "../../../0-definitions/__test__/context.test";
+import { TestContext } from "../../../0-base/__test__/context.test";
 import { TestBaseEntity } from "../../../1-entities/base/__test__/base-entity.test";
 import { TestBaseModel } from "../../../2-models/base/__test__/base-model.test";
 import { BaseService } from "../base-service";
@@ -18,7 +18,7 @@ export class TestBaseService extends BaseService<TestContext> {
   increment(id: string) {
     return this.startTx(async (tx) => {
       const e = await tx.findOneOrFail(TestBaseEntity, id);
-      const m = new TestBaseModel(this, { e });
+      const m = new TestBaseModel(this, { e, array: [] });
       m.incrementSeq();
       return {
         returns: () => m.e,

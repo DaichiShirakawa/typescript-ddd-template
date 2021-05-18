@@ -14,6 +14,14 @@ export class FacilityModel extends TenantScopedModel<D> {
     super(ch, { ...dependencies });
   }
 
+  get id() {
+    return this.facility.id;
+  }
+
+  get facility() {
+    return this.dependencies.facility;
+  }
+
   static register(ch: TenantContextHolder, init: Partial<Facility>) {
     const facility = new Facility(ch.context.tenantId, init);
     return new FacilityModel(ch, { facility });
@@ -21,7 +29,7 @@ export class FacilityModel extends TenantScopedModel<D> {
 
   updateFacilityName(name: string) {
     const { facility } = this.dependencies;
-    this.update("facility", facility.set({ name }));
+    this.update(facility.set({ name }));
     return this;
   }
 }

@@ -1,7 +1,7 @@
 import { Column } from "typeorm";
 import { v4 } from "uuid";
-import { TestHelper } from "../../../0-definitions/__test__/test-helper.test";
 import { TenantScopedEntity } from "../tenant-scoped-entity";
+import { TestHelper } from "../../../0-base/__test__/test-helper.test";
 
 export class TestTenantScopedEntity extends TenantScopedEntity<TestTenantScopedEntity> {
   @Column()
@@ -15,4 +15,6 @@ test("TenantScopedEntity", () => {
 
   const e1 = new TestTenantScopedEntity(tenantId, { seq: 1 });
   expect(e1.tenantId).toBe(tenantId);
+
+  expect(() => e1.set({ tenantId: "updated" } as any)).toThrow();
 });

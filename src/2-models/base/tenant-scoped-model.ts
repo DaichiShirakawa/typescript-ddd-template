@@ -1,8 +1,11 @@
-import { Tenant } from "../../1-entities/tenant.entity";
 import { HttpsError } from "../../0-base/https-error";
-import { BaseModel, ModelDependencies } from "./base-model";
+import { MyBaseEntity } from "../../1-entities/base/base-entity";
+import { TenantScopedEntity } from "../../1-entities/base/tenant-scoped-entity";
+import { Tenant } from "../../1-entities/tenant.entity";
+import { BaseModel, ModelDependencies, ModelDependency } from "./base-model";
 import { ModelHelper } from "./model-helper";
 import { TenantContext, TenantContextHolder } from "./tenant-context";
+import { NonArrayElement, ArrayElement } from "../../0-base/type-helper";
 
 /**
  * Tenant 配下のデータを扱うことに特化した Model
@@ -38,13 +41,36 @@ export abstract class TenantScopedModel<
     return this.context.tenant.tenantId;
   }
 
+  protected set<K extends keyof D>(key: K, data: NonArrayElement<D[K]>) {
+    super.set(key, this.assertTenantScoped(data));
+  }
+
+  protected add<K extends keyof D>(key: K, data: ArrayElement<D[K]>) {
+    super.add(key, this.assertTenantScoped(data));
+  }
+
   /**
    * Tenant を update した場合、 context の内容も更新します
    */
-  protected update<K extends keyof D>(name: K, updated: D[K]): D[K] {
+
+  protected update(updated: ModelDependency): void {
     if (updated instanceof Tenant) {
       this.context.tenant = updated as any;
     }
-    return super.update(name, updated);
+    return super.update(this.assertTenantScoped(updated));
+  }
+
+  /**
+   * @param data が Tenant 配下であることを検証
+   */
+  private assertTenantScoped<T>(data: T): T {
+    if (
+      (data instanceof TenantScopedEntity ||
+        data instanceof TenantScopedModel) &&
+      data.tenantId !== this.tenantId
+    ) {
+      throw new HttpsError("internal", `updated.tenantId not matched`);
+    }
+    return data;
   }
 }

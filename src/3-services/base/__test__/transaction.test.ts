@@ -1,4 +1,4 @@
-import { TestContext } from "../../../0-definitions/__test__/context.test";
+import { TestContext } from "../../../0-base/__test__/context.test";
 import { TestBaseEntity } from "../../../1-entities/base/__test__/base-entity.test";
 import { TestBaseModel } from "../../../2-models/base/__test__/base-model.test";
 import { LocalDBTransaction } from "./local-db-transaction";
@@ -36,7 +36,7 @@ test("Transaction", async () => {
   expect(e2.seq).toBe(2);
 
   const e3 = await LocalDBTransaction.startTx(ch, async (tx) => {
-    const m = new TestBaseModel(ch, { e: e2 });
+    const m = new TestBaseModel(ch, { e: e2, array: [] });
     m.incrementSeq();
     return {
       returns: () => m.e,

@@ -10,6 +10,10 @@ type D = {
 };
 
 export class TestTenantScopedModel extends TenantScopedModel<D> implements D {
+  get id() {
+    return this.be.id;
+  }
+
   get be() {
     return this.dependencies.be;
   }
@@ -19,10 +23,7 @@ export class TestTenantScopedModel extends TenantScopedModel<D> implements D {
   }
 
   addTE(init: Pick<TestTenantScopedEntity, "seq">) {
-    this.update("tes", [
-      ...this.tes,
-      new TestTenantScopedEntity(this.tenantId, init),
-    ]);
+    this.add("tes", new TestTenantScopedEntity(this.tenantId, init));
     return this;
   }
 }
