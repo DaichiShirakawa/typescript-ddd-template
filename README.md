@@ -14,6 +14,9 @@ TypeScript でレイヤ間疎結合を意識したドメイン駆動開発して
 
 ## How to Serve
 
+- start 時 [Connect to DB](#connect-to-db) を満たしていないと error ログが出る
+  - CRUD が出来ないだけで動いている
+
 ```
 # run without inspect
 npm start

@@ -1,7 +1,6 @@
 import cors from "cors";
 import express, { NextFunction, Request, Response } from "express";
 import SwaggerUI from "swagger-ui-express";
-import { initializeTransaction } from "../4-infrastructure/helpers/initialize-transaction";
 import { initializeTypeORM } from "../4-infrastructure/helpers/initialize-typeorm";
 import { APIMiddlewares } from "./helpers/express-middlewares";
 import { RegisterRoutes } from "./tsoa-generated/express-routes";
@@ -24,7 +23,6 @@ const router = express.Router();
 RegisterRoutes(router);
 router.use(async (req: Request, res: Response, next: NextFunction) => {
   await initializeTypeORM();
-  initializeTransaction();
   next();
 });
 app.use("/api/v1", router);
