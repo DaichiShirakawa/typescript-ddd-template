@@ -29,6 +29,27 @@ export abstract class Context<DATASET = {}> {
     }
     return this._source;
   }
+
+  /**
+   * 自分またはsourceをさかのぼって目的のContextを見つける
+   *
+   * @param contextClass 要求するContext
+   * @returns 見つからなければ null
+   */
+  public pick<C extends Context>(
+    contextClass: new (...args: any[]) => C
+  ): C | null {
+    for (
+      let cursor: Context | undefined = this;
+      cursor != null;
+      cursor = cursor._source
+    ) {
+      if (cursor.constructor.name === contextClass.name) {
+        return cursor as C;
+      }
+    }
+    return null;
+  }
 }
 
 export type ContextHolder<C extends Context = any> = {

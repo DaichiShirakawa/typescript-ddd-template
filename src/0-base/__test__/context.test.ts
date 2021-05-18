@@ -1,3 +1,4 @@
+import { hasUncaughtExceptionCaptureCallback } from "process";
 import { Context, ContextHolder } from "../context";
 import { TestHelper } from "./test-helper.test";
 
@@ -10,6 +11,8 @@ export class TestContext extends Context<{ testName: string }> {
     return this.dataset.testName;
   }
 }
+
+class AnotherContext extends Context<{}> {}
 
 test("context with no source", () => {
   const testName = TestHelper.timeKey();
@@ -26,4 +29,12 @@ test("context with source", () => {
 
   expect(context.hasSource).toBeTruthy();
   expect(() => context.source).toBeDefined();
+});
+
+test("pick context", () => {
+  const source = new TestContext(TestHelper.timeKey());
+  const another = new AnotherContext({ source: { context: source } });
+  expect(another.pick(TestContext)).toBe(source);
+  expect(another.pick(AnotherContext)).toBe(another);
+  expect(source.pick(AnotherContext)).toBeNull();
 });
