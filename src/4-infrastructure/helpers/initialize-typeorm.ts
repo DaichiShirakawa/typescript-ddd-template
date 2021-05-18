@@ -5,6 +5,7 @@ import { TenantScopedService } from "../../3-services/base/tenant-scoped-service
 import { TypeORMTenantScopedTx } from "../typeorm/typeorm-tenant-scoped-tx";
 import { TypeORMTx } from "../typeorm/typeorm-tx";
 import * as ENTITIES from "./entities-index";
+import { Env } from "../../0-base/env-def";
 
 export function initializeTypeORM() {
   return promise;
@@ -16,6 +17,7 @@ const promise = new Promise<void>(async (resolve) => {
     const entities = Object.values(ENTITIES);
     await createConnection({
       ...opts,
+      logging: Env.NODE_ENV === "test",
       // optsのままだとうまく行かないので、indexを作ってそこにファイル単位で登録するようにした
       entities: entities as any,
       migrations: [], // migrationの中身もなぜか読まれてエラー出る
