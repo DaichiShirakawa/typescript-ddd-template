@@ -13,8 +13,13 @@ export abstract class Context<DATASET = {}> {
   protected readonly dataset: DATASET;
   private readonly _source?: Context;
 
-  constructor(dataset: DATASET & { source?: ContextHolder }) {
-    this._source = dataset.source?.context;
+  constructor(dataset: DATASET & { source?: ContextHolder | Context }) {
+    const { source } = dataset;
+
+    if (source) {
+      this._source = source instanceof Context ? source : source.context;
+    }
+
     this.dataset = { ...dataset };
     delete (this.dataset as any).source;
   }
