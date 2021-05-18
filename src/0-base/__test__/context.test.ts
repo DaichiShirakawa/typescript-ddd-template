@@ -34,7 +34,10 @@ test("context with source", () => {
 test("pick context", () => {
   const source = new TestContext(TestHelper.timeKey());
   const another = new AnotherContext({ source: { context: source } });
+  expect(another.has(TestContext)).toBeTruthy();
   expect(another.pick(TestContext)).toBe(source);
+  expect(another.has(AnotherContext)).toBeTruthy;
   expect(another.pick(AnotherContext)).toBe(another);
+  expect(source.has(AnotherContext)).toBeFalsy();
   expect(source.pick(AnotherContext)).toBeNull();
 });

@@ -50,6 +50,17 @@ export abstract class Context<DATASET = {}> {
     }
     return null;
   }
+
+  /**
+   * 自分またはsourceをさかのぼって目的のContextを保有しているかを調べる
+   *
+   * @param contextClass 要求するContext
+   */
+  public has<C extends Context>(
+    contextClass: new (...args: any[]) => C
+  ): boolean {
+    return this.pick(contextClass) != null;
+  }
 }
 
 export type ContextHolder<C extends Context = any> = {
