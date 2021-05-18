@@ -169,7 +169,7 @@ export class TypeORMTenantScopedTx extends TypeORMTx<TenantContext> {
       ? { where: optionsOrId as string }
       : { ...(optionsOrId as any) };
     options.where = this.completeTenantWhere(entityClass, options.where);
-    return super.findOne(entityClass, optionsOrId);
+    return super.findOne(entityClass, options);
   }
 
   /**
