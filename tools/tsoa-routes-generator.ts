@@ -12,7 +12,7 @@ import {
 
   const entryFile = `src/functions.index.ts`;
   const controllerPathGlobs = [`src/**/*.api.ts`];
-  const authenticationModule = `src/4-presentation/base/authenticator.ts`;
+  const authenticationModule = `src/4-presentation/base/api-authenticator.ts`;
 
   const swaggerOpts: ExtendedSpecConfig = {
     schemes: ["http", "https"],

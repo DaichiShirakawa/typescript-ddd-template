@@ -1,9 +1,8 @@
-import { ContextHolder } from "../0-base/context";
+import { HttpsError } from "../0-base/https-error";
 import { Facility } from "../1-entities/facility.entity";
 import { Tenant } from "../1-entities/tenant.entity";
-import { HttpsError } from "../0-base/https-error";
+import { TenantContext } from "./base/tenant-context";
 import { TenantScopedModel } from "./base/tenant-scoped-model";
-import { TenantContext, TenantContextHolder } from "./base/tenant-context";
 import { FacilityModel } from "./facility.model";
 
 type D = {
@@ -17,29 +16,21 @@ type D = {
 export class TenantModel extends TenantScopedModel<D> {
   static TENANT_CODE_REGEX = /^[a-z0-9\-_]{3,32}$/;
 
-  constructor(ch: TenantContextHolder) {
-    if (!ch.context.hasTenant) {
-      throw new HttpsError(
-        "internal",
-        `No tenant in context, use register() first`
-      );
-    }
-    super(ch, {
-      tenant: ch.context.tenant,
-      facilityModels: [],
-    });
+  constructor(context = TenantContext.instance) {
+    super({ tenant: context.tenant, facilityModels: [] });
   }
 
   get id() {
     return this.tenantId;
   }
 
-  static register(ch: ContextHolder, init: Pick<Tenant, "name" | "code">) {
+  static register(init: Pick<Tenant, "name" | "code">) {
     const tenant = new Tenant(init);
-    const context = new TenantContext({ source: ch, tenant });
-    const model = new TenantModel({ context });
-    model.validateCode();
-    return model;
+    const context = new TenantContext(tenant);
+    const model = new TenantModel(context);
+
+    model.validateCode(init.code);
+    return { model, context };
   }
 
   updateName(name: string) {
@@ -51,12 +42,12 @@ export class TenantModel extends TenantScopedModel<D> {
   updateCode(code: string) {
     const { tenant } = this.dependencies;
     this.update(tenant.set({ code }));
-    this.validateCode();
+    this.validateCode(code);
     return this;
   }
 
-  private validateCode() {
-    if (!this.tenant.code.match(TenantModel.TENANT_CODE_REGEX)) {
+  private validateCode(code: string) {
+    if (!code.match(TenantModel.TENANT_CODE_REGEX)) {
       throw new HttpsError(
         "out-of-range",
         `code should match to ${TenantModel.TENANT_CODE_REGEX}: "${this.tenant.code}"`
@@ -66,8 +57,7 @@ export class TenantModel extends TenantScopedModel<D> {
   }
 
   addFacility(init: Pick<Facility, "name">) {
-    const { facilityModels } = this.dependencies;
-    const added = FacilityModel.register(this, init);
+    const added = FacilityModel.register(init);
     this.add("facilityModels", added);
     return added;
   }

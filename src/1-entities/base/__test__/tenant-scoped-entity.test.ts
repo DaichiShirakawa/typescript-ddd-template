@@ -1,20 +1,22 @@
-import { Column } from "typeorm";
-import { v4 } from "uuid";
-import { TenantScopedEntity } from "../tenant-scoped-entity";
-import { TestHelper } from "../../../0-base/__test__/test-helper.test";
+import { TestHelper } from "../../../0-base/__test__/test-helper";
+import { Tenant } from "../../tenant.entity";
+import { TestTenantScopedEntity } from "./test-tenant-scoped-entity";
 
-export class TestTenantScopedEntity extends TenantScopedEntity<TestTenantScopedEntity> {
-  @Column()
-  readonly id: string = `test_${v4()}`;
-  @Column()
-  readonly seq: number;
-}
+describe("TenantScopedEntity", () => {
+  const tenant = new Tenant({
+    name: "test",
+    code: TestHelper.timeKey("code_"),
+  });
 
-test("TenantScopedEntity", () => {
-  const tenantId = TestHelper.timeKey("tenant_");
+  test("constructor", () => {
+    expect(
+      () => new TestTenantScopedEntity(tenant.id, { seq: 1 })
+    ).toBeDefined();
+  });
 
-  const e1 = new TestTenantScopedEntity(tenantId, { seq: 1 });
-  expect(e1.tenantId).toBe(tenantId);
-
-  expect(() => e1.set({ tenantId: "updated" } as any)).toThrow();
+  test("set", () => {
+    const e = new TestTenantScopedEntity(tenant.id, { seq: 1 });
+    expect(e.tenantId).toBe(tenant.id);
+    expect(() => e.set({ tenantId: "updated" } as any)).toThrow();
+  });
 });

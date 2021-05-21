@@ -1,5 +1,4 @@
 import { EntityTarget, FindManyOptions } from "typeorm";
-import { Context, ContextHolder } from "../../0-base/context";
 import { HttpsError } from "../../0-base/https-error";
 import { MyBaseEntity } from "../../1-entities/base/base-entity";
 import { BaseModel } from "../../2-models/base/base-model";
@@ -8,14 +7,10 @@ import { TransactionHelper } from "./transaction-helper";
 /**
  * Transaction ですべきことだけを定義した型
  */
-export abstract class Transaction<C extends Context = Context>
-  implements ContextHolder<C>
-{
-  readonly context: C;
+export abstract class Transaction {
   readonly isReadonly: boolean;
 
-  constructor(ch: ContextHolder<C>, isReadonly: boolean) {
-    this.context = ch.context;
+  constructor(isReadonly: boolean) {
     this.isReadonly = isReadonly;
   }
 
@@ -28,7 +23,6 @@ export abstract class Transaction<C extends Context = Context>
    * @returns
    */
   static async startTx<R>(
-    ch: ContextHolder,
     func: TxProcessor<R>,
     tx: Transaction,
     commit = (savedTargets: SavedTarget[]): void | Promise<void> => {}
@@ -50,15 +44,14 @@ export abstract class Transaction<C extends Context = Context>
     await commit(savedTargets);
     TransactionHelper.updateDependencies(savedTargets);
 
-    return result.returns ? result.returns() : (null as any);
+    return result.returns ? await result.returns() : (null as any);
   }
 
   static async startReadonlyTx<R>(
-    ch: ContextHolder,
     func: ReadonlyTxProcessor<R>,
     tx: Transaction
   ): Promise<R> {
-    return func(tx);
+    return await func(tx);
   }
 
   /**
@@ -91,18 +84,27 @@ export abstract class Transaction<C extends Context = Context>
       throw new HttpsError("internal", `Read only transaction`);
     }
 
-    const savedTargets: SavedTarget[] = [...(targets as any)].sort(
-      (a, b) => a.entity.txSeq - b.entity.txSeq
+    targets = [...targets].sort(
+      (a, b) =>
+        a.entity.instanceMeta.instanceSeq - b.entity.instanceMeta.instanceSeq
     );
 
-    for (const target of savedTargets) {
+    const savedTargets: SavedTarget[] = [];
+
+    for (const target of targets) {
       if (target.entity.instanceMeta.isNewEntity) {
-        target.savedEntity = await this.insert(target.entity);
-        target.inserted = true;
-      } else {
-        target.updatedPropNames = target.entity.instanceMeta
-          .updatedProps as ReadonlySet<string>;
-        target.savedEntity = await this.update(target.entity);
+        savedTargets.push({
+          ...target,
+          savedEntity: await this.insert(target.entity),
+          inserted: true,
+        });
+      } else if (0 < target.entity.instanceMeta.updatedProps.size) {
+        savedTargets.push({
+          ...target,
+          savedEntity: await this.update(target.entity),
+          updatedPropNames: target.entity.instanceMeta
+            .updatedProps as ReadonlySet<string>,
+        });
       }
     }
 
@@ -129,23 +131,16 @@ export type ReadonlyTxProcessor<R = undefined> = (
   tx: Transaction
 ) => R | Promise<R>;
 
-export type TxStarters<C extends Context = Context> = {
-  tx: <R>(ch: ContextHolder<C>, func: TxProcessor<R>) => Promise<R>;
-  readonlyTx: <R>(
-    ch: ContextHolder<C>,
-    func: ReadonlyTxProcessor<R>
-  ) => Promise<R>;
-};
-
-export type SaveTarget = {
+export type SaveTarget<E extends MyBaseEntity = MyBaseEntity> = {
   model: BaseModel;
   dependencyName: string;
   dependencyArrayIndex?: number;
-  entity: MyBaseEntity;
+  entity: E;
 };
 
-export type SavedTarget = SaveTarget & {
-  savedEntity: MyBaseEntity;
-  inserted?: boolean;
-  updatedPropNames?: ReadonlySet<string>;
-};
+export type SavedTarget<E extends MyBaseEntity = MyBaseEntity> =
+  SaveTarget<E> & {
+    savedEntity: E;
+    inserted?: boolean;
+    updatedPropNames?: ReadonlySet<string>;
+  };

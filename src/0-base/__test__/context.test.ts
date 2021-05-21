@@ -1,43 +1,79 @@
-import { hasUncaughtExceptionCaptureCallback } from "process";
-import { Context, ContextHolder } from "../context";
-import { TestHelper } from "./test-helper.test";
+import { Context } from "../context";
+import { ContextHolder } from "../context-holder";
+import { TestHelper } from "./test-helper";
 
-export class TestContext extends Context<{ testName: string }> {
-  constructor(testName: string, source?: ContextHolder) {
-    super({ testName, source });
-  }
-
-  get testName() {
-    return this.dataset.testName;
+class TestContext extends Context {
+  constructor(readonly testName: string) {
+    super();
   }
 }
 
-class AnotherContext extends Context<{}> {}
+class AnotherContext extends Context {}
 
-test("context with no source", () => {
-  const testName = TestHelper.timeKey();
-  const context = new TestContext(testName);
-
-  expect(context.hasSource).toBeFalsy();
-  expect(() => context.source).toThrow();
-  expect(context.testName).toBe(testName);
+describe("Context", () => {
+  test("dataset", () => {
+    const testName = TestHelper.timeKey();
+    const context = new TestContext(testName);
+    expect(context.testName).toBe(testName);
+  });
 });
 
-test("context with source", () => {
-  const source = new TestContext(TestHelper.timeKey());
-  const context = new TestContext(TestHelper.timeKey(), { context: source });
+describe("ContextHolder", () => {
+  test("initialize", () => {
+    ContextHolder.startSession();
+    ContextHolder.endSession();
+  });
 
-  expect(context.hasSource).toBeTruthy();
-  expect(() => context.source).toBeDefined();
-});
+  test("set", () => {
+    expect(() => ContextHolder.set(new TestContext("test"))).toThrow();
+    ContextHolder.startSession();
+    expect(ContextHolder.set(new TestContext("test"))).toBeDefined();
+    expect(() => ContextHolder.set(new TestContext("test"))).toThrow();
+    ContextHolder.endSession();
+  });
 
-test("pick context", () => {
-  const source = new TestContext(TestHelper.timeKey());
-  const another = new AnotherContext({ source: { context: source } });
-  expect(another.has(TestContext)).toBeTruthy();
-  expect(another.pick(TestContext)).toBe(source);
-  expect(another.has(AnotherContext)).toBeTruthy;
-  expect(another.pick(AnotherContext)).toBe(another);
-  expect(source.has(AnotherContext)).toBeFalsy();
-  expect(source.pick(AnotherContext)).toBeNull();
+  test("getOrNull", () => {
+    expect(() => ContextHolder.getOrNull(TestContext)).toThrow();
+    ContextHolder.startSession();
+
+    expect(ContextHolder.getOrNull(TestContext)).toBe(null);
+    ContextHolder.set(new TestContext("test"));
+    const c = ContextHolder.getOrNull(TestContext);
+    expect(c).toBeInstanceOf(TestContext);
+    expect(ContextHolder.getOrNull(AnotherContext)).toBeNull();
+    ContextHolder.endSession();
+  });
+
+  test("get", () => {
+    expect(() => ContextHolder.get(TestContext)).toThrow();
+    ContextHolder.startSession();
+
+    expect(() => ContextHolder.get(TestContext)).toThrow();
+    ContextHolder.set(new TestContext("test"));
+    expect(ContextHolder.get(TestContext)).toBeInstanceOf(TestContext);
+    expect(() => ContextHolder.get(AnotherContext)).toThrow();
+    ContextHolder.endSession();
+  });
+
+  test("has", () => {
+    expect(() => ContextHolder.has(TestContext)).toThrow();
+    ContextHolder.startSession();
+
+    expect(ContextHolder.has(TestContext)).toBeFalsy();
+    ContextHolder.set(new TestContext("test"));
+    expect(ContextHolder.has(TestContext)).toBeTruthy();
+    expect(ContextHolder.has(AnotherContext)).toBeFalsy();
+    ContextHolder.endSession();
+  });
+
+  test("assertEmpty", () => {
+    expect(() => ContextHolder.assertEmpty(TestContext)).toThrow();
+    ContextHolder.startSession();
+
+    expect(() => ContextHolder.assertEmpty(TestContext)).not.toThrow();
+    ContextHolder.set(new TestContext("test"));
+    expect(() => ContextHolder.assertEmpty(TestContext)).toThrow();
+    expect(() => ContextHolder.assertEmpty(AnotherContext)).not.toThrow();
+    ContextHolder.endSession();
+  });
 });

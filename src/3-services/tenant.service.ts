@@ -1,8 +1,8 @@
 import { getConnection } from "typeorm";
+import { ContextHolder } from "../0-base/context-holder";
+import { HttpsError } from "../0-base/https-error";
 import { Tenant } from "../1-entities/tenant.entity";
 import { TenantModel } from "../2-models/tenant.model";
-import { HttpsError } from "../0-base/https-error";
-import { ContextHolder } from "../0-base/context";
 import { TenantScopedService } from "./base/tenant-scoped-service";
 
 export class TenantService extends TenantScopedService {
@@ -16,34 +16,9 @@ export class TenantService extends TenantScopedService {
     );
   }
 
-  /**
-   * 登録時は context に tenant がセットされていないため、
-   * TenantTransaction を使わず直接保存
-   */
-  static register(
-    ch: ContextHolder,
-    data: Pick<Tenant, "name" | "code">
-  ): Promise<Tenant> {
-    return getConnection().transaction(async (tx) => {
-      if (await tx.findOne(Tenant, { where: { code: data.code } })) {
-        throw new HttpsError(
-          "already-exists",
-          `Already exists: "${data.code}"`
-        );
-      }
-
-      const model = TenantModel.register(ch, data);
-
-      await tx.insert(Tenant, model.tenant);
-      const tenant = await tx.findOneOrFail(Tenant, model.tenantId);
-
-      return tenant;
-    });
-  }
-
   updateName(name: string): Promise<Tenant> {
     return this.startTx(async (tx) => {
-      const model = new TenantModel(this).updateName(name);
+      const model = new TenantModel().updateName(name);
       return {
         returns: () => model.tenant,
         saveModels: [model],
@@ -60,7 +35,7 @@ export class TenantService extends TenantScopedService {
     }
 
     return this.startTx(async (tx) => {
-      const model = new TenantModel(this).updateCode(code);
+      const model = new TenantModel().updateCode(code);
       return {
         returns: () => model.tenant,
         saveModels: [model],

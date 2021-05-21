@@ -9,9 +9,14 @@
       "port": 9229,
       "skipFiles": [
         "<node_internals>/**/*",
-        "node_modules/**/*.js",
+        "**/node_modules/**/*",
         "async_hooks.js",
-        "inspector_async_hook.js"
+        "inspector_async_hook.js",
+        "async_hooks",
+        "inspector_async_hook",
+        "internal/async_hooks",
+        "internal/task_queues",
+        "internal/inspector_async_hooks"
       ]
     }
   ]

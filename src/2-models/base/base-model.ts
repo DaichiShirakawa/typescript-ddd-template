@@ -1,6 +1,10 @@
-import { Context, ContextHolder } from "../../0-base/context";
+import { Context } from "../../0-base/context";
 import { HttpsError } from "../../0-base/https-error";
-import { ArrayElement, NonArrayElement } from "../../0-base/type-helper";
+import {
+  ArrayElement,
+  Constructor,
+  NonArrayElement,
+} from "../../0-base/type-helper";
 import { MyBaseEntity } from "../../1-entities/base/base-entity";
 
 export type ModelDependency = MyBaseEntity | BaseModel;
@@ -16,12 +20,7 @@ export type ModelDependencies = {
  * - Entities の変更とバリデーションを司る
  * - Transaction から Save される際 Entities / Sub Models すべてが対象となる
  */
-export abstract class BaseModel<
-  C extends Context = Context,
-  D extends ModelDependencies = {}
-> implements ContextHolder<C>
-{
-  readonly context: C;
+export abstract class BaseModel<D extends ModelDependencies = {}> {
   private readonly _dependencies: D = {} as any;
   /**
    * Model が一意に定まるIDを返す
@@ -29,8 +28,7 @@ export abstract class BaseModel<
    */
   abstract id: string;
 
-  constructor(ch: ContextHolder<C>, dependencies: D) {
-    this.context = ch.context;
+  constructor(dependencies: D) {
     this._dependencies = { ...dependencies };
   }
 

@@ -1,11 +1,10 @@
 import { HttpsError } from "../../0-base/https-error";
-import { MyBaseEntity } from "../../1-entities/base/base-entity";
+import { ArrayElement, NonArrayElement } from "../../0-base/type-helper";
 import { TenantScopedEntity } from "../../1-entities/base/tenant-scoped-entity";
 import { Tenant } from "../../1-entities/tenant.entity";
 import { BaseModel, ModelDependencies, ModelDependency } from "./base-model";
 import { ModelHelper } from "./model-helper";
-import { TenantContext, TenantContextHolder } from "./tenant-context";
-import { NonArrayElement, ArrayElement } from "../../0-base/type-helper";
+import { TenantContext } from "./tenant-context";
 
 /**
  * Tenant 配下のデータを扱うことに特化した Model
@@ -13,40 +12,42 @@ import { NonArrayElement, ArrayElement } from "../../0-base/type-helper";
  */
 export abstract class TenantScopedModel<
   D extends ModelDependencies
-> extends BaseModel<TenantContext, D> {
-  constructor(ch: TenantContextHolder, dependencies: D) {
-    super(ch, dependencies);
+> extends BaseModel<D> {
+  constructor(dependencies: D) {
+    super({ ...dependencies, events: [] });
 
-    const errors = ModelHelper.toEntitiesArray(this).filter(
-      (e) => "tenantId" in e && e["tenantId"] !== this.context.tenantId
-    );
-
-    if (errors.length) {
-      throw new HttpsError(
-        "failed-precondition",
-        `Invalid resources: tenantId not matches`,
-        {
-          expected: this.tenantId,
-          errors,
-        }
+    if (TenantContext.hasInstance) {
+      const errors = ModelHelper.toEntitiesArray(this).filter(
+        (e) => "tenantId" in e && e["tenantId"] !== TenantContext.instance.id
       );
+
+      if (errors.length) {
+        throw new HttpsError(
+          "failed-precondition",
+          `Invalid resources: tenantId not matches`,
+          {
+            expected: this.tenantId,
+            errors,
+          }
+        );
+      }
     }
   }
 
   get tenant() {
-    return this.context.tenant;
+    return TenantContext.instance.tenant;
   }
 
   get tenantId() {
-    return this.context.tenant.tenantId;
+    return this.tenant.tenantId;
   }
 
   protected set<K extends keyof D>(key: K, data: NonArrayElement<D[K]>) {
-    super.set(key, this.assertTenantScoped(data));
+    return super.set(key, this.assertTenantScoped(data));
   }
 
   protected add<K extends keyof D>(key: K, data: ArrayElement<D[K]>) {
-    super.add(key, this.assertTenantScoped(data));
+    return super.add(key, this.assertTenantScoped(data));
   }
 
   /**
@@ -55,7 +56,7 @@ export abstract class TenantScopedModel<
 
   protected update(updated: ModelDependency): void {
     if (updated instanceof Tenant) {
-      this.context.tenant = updated as any;
+      TenantContext.instance.tenant = updated;
     }
     return super.update(this.assertTenantScoped(updated));
   }

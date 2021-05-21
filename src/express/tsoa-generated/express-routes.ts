@@ -7,8 +7,10 @@ import { Controller, ValidationService, FieldErrors, ValidateError, TsoaRoute, H
 // WARNING: This file was auto-generated with tsoa. Please do not modify it. Re-run tsoa to re-generate this file: https://github.com/lukeautry/tsoa
 import { FacilityAPI } from './../../4-presentation/facility.api';
 // WARNING: This file was auto-generated with tsoa. Please do not modify it. Re-run tsoa to re-generate this file: https://github.com/lukeautry/tsoa
+import { SampleAPI } from './../../4-presentation/sample.api';
+// WARNING: This file was auto-generated with tsoa. Please do not modify it. Re-run tsoa to re-generate this file: https://github.com/lukeautry/tsoa
 import { TenantAPI } from './../../4-presentation/tenant.api';
-import { expressAuthentication } from './../../4-presentation/base/authenticator';
+import { expressAuthentication } from './../../4-presentation/base/api-authenticator';
 import * as express from 'express';
 
 // WARNING: This file was auto-generated with tsoa. Please do not modify it. Re-run tsoa to re-generate this file: https://github.com/lukeautry/tsoa
@@ -70,12 +72,10 @@ export function RegisterRoutes(app: express.Router) {
     //  NOTE: If you do not see routes for all of your controllers in this file, then you might not have informed tsoa of where to look
     //      Please look into the "controllerPathGlobs" config option described in the readme: https://github.com/lukeautry/tsoa
     // ###########################################################################################################
-        app.post('/tenants/:tenantId/facilities',
-            authenticateMiddleware([{"CONSOLE":["TENANT"]}]),
+        app.post('/facilities',
+            authenticateMiddleware([{"API":["TENANT"]}]),
             function FacilityAPI_registerFacilityGMO(request: any, response: any, next: any) {
             const args = {
-                    req: {"in":"request","name":"req","required":true,"dataType":"object"},
-                    tenantId: {"in":"path","name":"tenantId","required":true,"dataType":"string"},
                     data: {"in":"body","name":"data","required":true,"ref":"RegisterFacilityReq"},
             };
 
@@ -95,12 +95,10 @@ export function RegisterRoutes(app: express.Router) {
             promiseHandler(controller, promise, response, undefined, next);
         });
         // WARNING: This file was auto-generated with tsoa. Please do not modify it. Re-run tsoa to re-generate this file: https://github.com/lukeautry/tsoa
-        app.get('/tenants/:tenantId/facilities/:tenantId/facilities',
-            authenticateMiddleware([{"CONSOLE":["TENANT"]}]),
+        app.get('/facilities',
+            authenticateMiddleware([{"API":["TENANT"]}]),
             function FacilityAPI_listFacilities(request: any, response: any, next: any) {
             const args = {
-                    req: {"in":"request","name":"req","required":true,"dataType":"object"},
-                    tenantId: {"in":"path","name":"tenantId","required":true,"dataType":"string"},
             };
 
             // WARNING: This file was auto-generated with tsoa. Please do not modify it. Re-run tsoa to re-generate this file: https://github.com/lukeautry/tsoa
@@ -119,11 +117,77 @@ export function RegisterRoutes(app: express.Router) {
             promiseHandler(controller, promise, response, undefined, next);
         });
         // WARNING: This file was auto-generated with tsoa. Please do not modify it. Re-run tsoa to re-generate this file: https://github.com/lukeautry/tsoa
+        app.get('/samples/get/:path',
+            authenticateMiddleware([{"NONE":[]}]),
+            function SampleAPI_sampleGet(request: any, response: any, next: any) {
+            const args = {
+                    path: {"in":"path","name":"path","required":true,"dataType":"string"},
+            };
+
+            // WARNING: This file was auto-generated with tsoa. Please do not modify it. Re-run tsoa to re-generate this file: https://github.com/lukeautry/tsoa
+
+            let validatedArgs: any[] = [];
+            try {
+                validatedArgs = getValidatedArgs(args, request, response);
+            } catch (err) {
+                return next(err);
+            }
+
+            const controller = new SampleAPI();
+
+
+            const promise = controller.sampleGet.apply(controller, validatedArgs as any);
+            promiseHandler(controller, promise, response, undefined, next);
+        });
+        // WARNING: This file was auto-generated with tsoa. Please do not modify it. Re-run tsoa to re-generate this file: https://github.com/lukeautry/tsoa
+        app.get('/samples/error',
+            authenticateMiddleware([{"NONE":[]}]),
+            function SampleAPI_sampleError(request: any, response: any, next: any) {
+            const args = {
+            };
+
+            // WARNING: This file was auto-generated with tsoa. Please do not modify it. Re-run tsoa to re-generate this file: https://github.com/lukeautry/tsoa
+
+            let validatedArgs: any[] = [];
+            try {
+                validatedArgs = getValidatedArgs(args, request, response);
+            } catch (err) {
+                return next(err);
+            }
+
+            const controller = new SampleAPI();
+
+
+            const promise = controller.sampleError.apply(controller, validatedArgs as any);
+            promiseHandler(controller, promise, response, undefined, next);
+        });
+        // WARNING: This file was auto-generated with tsoa. Please do not modify it. Re-run tsoa to re-generate this file: https://github.com/lukeautry/tsoa
+        app.get('/samples/busy',
+            authenticateMiddleware([{"NONE":[]}]),
+            function SampleAPI_sampleBusy(request: any, response: any, next: any) {
+            const args = {
+            };
+
+            // WARNING: This file was auto-generated with tsoa. Please do not modify it. Re-run tsoa to re-generate this file: https://github.com/lukeautry/tsoa
+
+            let validatedArgs: any[] = [];
+            try {
+                validatedArgs = getValidatedArgs(args, request, response);
+            } catch (err) {
+                return next(err);
+            }
+
+            const controller = new SampleAPI();
+
+
+            const promise = controller.sampleBusy.apply(controller, validatedArgs as any);
+            promiseHandler(controller, promise, response, undefined, next);
+        });
+        // WARNING: This file was auto-generated with tsoa. Please do not modify it. Re-run tsoa to re-generate this file: https://github.com/lukeautry/tsoa
         app.post('/tenants',
-            authenticateMiddleware([{"CONSOLE":[]}]),
+            authenticateMiddleware([{"API":["SUPER"]}]),
             function TenantAPI_register(request: any, response: any, next: any) {
             const args = {
-                    req: {"in":"request","name":"req","required":true,"dataType":"object"},
                     data: {"in":"body","name":"data","required":true,"ref":"RegisterTenantReq"},
             };
 
@@ -144,10 +208,9 @@ export function RegisterRoutes(app: express.Router) {
         });
         // WARNING: This file was auto-generated with tsoa. Please do not modify it. Re-run tsoa to re-generate this file: https://github.com/lukeautry/tsoa
         app.get('/tenants',
-            authenticateMiddleware([{"CONSOLE":[]}]),
+            authenticateMiddleware([{"API":["SUPER"]}]),
             function TenantAPI_list(request: any, response: any, next: any) {
             const args = {
-                    req: {"in":"request","name":"req","required":true,"dataType":"object"},
             };
 
             // WARNING: This file was auto-generated with tsoa. Please do not modify it. Re-run tsoa to re-generate this file: https://github.com/lukeautry/tsoa
@@ -167,10 +230,9 @@ export function RegisterRoutes(app: express.Router) {
         });
         // WARNING: This file was auto-generated with tsoa. Please do not modify it. Re-run tsoa to re-generate this file: https://github.com/lukeautry/tsoa
         app.get('/tenants/:tenantId',
-            authenticateMiddleware([{"CONSOLE":["TENANT"]}]),
+            authenticateMiddleware([{"API":["SUPER"]}]),
             function TenantAPI_find(request: any, response: any, next: any) {
             const args = {
-                    req: {"in":"request","name":"req","required":true,"dataType":"object"},
                     tenantId: {"in":"path","name":"tenantId","required":true,"dataType":"string"},
             };
 
@@ -191,10 +253,9 @@ export function RegisterRoutes(app: express.Router) {
         });
         // WARNING: This file was auto-generated with tsoa. Please do not modify it. Re-run tsoa to re-generate this file: https://github.com/lukeautry/tsoa
         app.patch('/tenants/:tenantId/name',
-            authenticateMiddleware([{"CONSOLE":["TENANT"]}]),
+            authenticateMiddleware([{"API":["TENANT"]}]),
             function TenantAPI_updateName(request: any, response: any, next: any) {
             const args = {
-                    req: {"in":"request","name":"req","required":true,"dataType":"object"},
                     data: {"in":"body","name":"data","required":true,"dataType":"nestedObjectLiteral","nestedProperties":{"name":{"dataType":"string","required":true}}},
                     tenantId: {"in":"path","name":"tenantId","required":true,"dataType":"string"},
             };
@@ -216,10 +277,9 @@ export function RegisterRoutes(app: express.Router) {
         });
         // WARNING: This file was auto-generated with tsoa. Please do not modify it. Re-run tsoa to re-generate this file: https://github.com/lukeautry/tsoa
         app.patch('/tenants/:tenantId/code',
-            authenticateMiddleware([{"CONSOLE":["TENANT"]}]),
+            authenticateMiddleware([{"API":["TENANT"]}]),
             function TenantAPI_updateCode(request: any, response: any, next: any) {
             const args = {
-                    req: {"in":"request","name":"req","required":true,"dataType":"object"},
                     data: {"in":"body","name":"data","required":true,"dataType":"nestedObjectLiteral","nestedProperties":{"code":{"dataType":"string","required":true}}},
                     tenantId: {"in":"path","name":"tenantId","required":true,"dataType":"string"},
             };

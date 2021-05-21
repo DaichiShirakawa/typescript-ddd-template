@@ -122,4 +122,16 @@ export class TransactionHelper {
       target.model.dangerUpdateFromTransaction(target.savedEntity);
     }
   }
+
+  /**
+   * insert 後の load をやり直した時に Entity のもつ relations 内容を引き継ぐためのツール
+   * @param entity
+   * @return entity インスタンスが現在保有している relations
+   */
+  static toContainsRelations<T extends MyBaseEntity>(entity: T): string[] {
+    const { relations } = getRepository(entity.constructor).metadata;
+    return relations
+      .filter((r) => (entity as any)[r.propertyName] != null)
+      .map((r) => r.propertyName);
+  }
 }

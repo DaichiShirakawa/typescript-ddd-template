@@ -1,37 +1,32 @@
 import { Tenant } from "../../1-entities/tenant.entity";
 import { TenantContext } from "../../2-models/base/tenant-context";
 import { BaseService } from "./base-service";
-import {
-  Transaction,
-  TxProcessor,
-  TxStarters,
-  ReadonlyTxProcessor,
-} from "./transaction";
+import { ReadonlyTxProcessor, Transaction, TxProcessor } from "./transaction";
+import { TransactionContext } from "./transaction-context";
 
-export abstract class TenantScopedService extends BaseService<TenantContext> {
-  static TX_STARTERS: TxStarters<TenantContext>;
-
+export abstract class TenantScopedService extends BaseService {
   get tenant(): Tenant {
-    return this.context.tenant;
+    return TenantContext.instance.tenant;
   }
 
   get tenantId(): string {
-    return this.context.tenantId;
+    return TenantContext.instance.id;
   }
 
   /**
    * Tenant に属するデータのみ読み書きできるよう、拡張された Transaction
+   *
    * @see {Transaction}
    */
-  protected startTx<R>(func: TxProcessor<R>): Promise<R> {
-    return TenantScopedService.TX_STARTERS.tx(this, func);
+  protected async startTx<R>(func: TxProcessor<R>): Promise<R> {
+    return await TransactionContext.instance.tenantScopedTx(func);
   }
 
   /**
    * 読み込み専用 Transaction
    */
   protected startReadonlyTx<R>(func: ReadonlyTxProcessor<R>): Promise<R> {
-    return TenantScopedService.TX_STARTERS.readonlyTx(this, func);
+    return TransactionContext.instance.tenantScopedReadonlyTx(func);
   }
 
   /**

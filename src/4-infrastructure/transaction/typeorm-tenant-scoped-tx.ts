@@ -3,16 +3,12 @@ import {
   FindConditions,
   FindManyOptions,
   getConnection,
-  getRepository,
   ObjectLiteral,
 } from "typeorm";
 import { HttpsError } from "../../0-base/https-error";
 import { MyBaseEntity } from "../../1-entities/base/base-entity";
 import { TenantScopedEntity } from "../../1-entities/base/tenant-scoped-entity";
-import {
-  TenantContext,
-  TenantContextHolder,
-} from "../../2-models/base/tenant-context";
+import { TenantContext } from "../../2-models/base/tenant-context";
 import {
   ReadonlyTxProcessor,
   TxProcessor,
@@ -25,25 +21,19 @@ import { TypeORMTx } from "./typeorm-tx";
  * - insert/update 後に最新データを select して返すなど、拡張されています
  * - TenantEntity を継承した Entity に対して、自動で tenantId を加味した読み書きを行います
  */
-export class TypeORMTenantScopedTx extends TypeORMTx<TenantContext> {
+export class TypeORMTenantScopedTx extends TypeORMTx {
   /**
    * models 管理下にあるすべての entities を Save したあとに returns() の結果を返す
    */
-  static async startTx<R>(
-    ch: TenantContextHolder,
-    func: TxProcessor<R>
-  ): Promise<R> {
-    return super.startTx(ch, func, TypeORMTenantScopedTx);
+  static startTx<R>(func: TxProcessor<R>): Promise<R> {
+    return super.startTx(func, TypeORMTenantScopedTx);
   }
 
   /**
    * 保存系が封じられた Tx
    */
-  static async startReadonlyTx<R>(
-    ch: TenantContextHolder,
-    func: ReadonlyTxProcessor<R>
-  ): Promise<R> {
-    return super.startReadonlyTx(ch, func, TypeORMTenantScopedTx);
+  static async startReadonlyTx<R>(func: ReadonlyTxProcessor<R>): Promise<R> {
+    return super.startReadonlyTx(func, TypeORMTenantScopedTx);
   }
 
   /**
@@ -51,15 +41,13 @@ export class TypeORMTenantScopedTx extends TypeORMTx<TenantContext> {
    * またTenantEntityのインスタンスである場合、ContextのTenantに属するものであることを確認します。
    * @param entity
    */
-  isTenantEntity<T extends MyBaseEntity<any>>(
-    entity: T | EntityTarget<T>
-  ): boolean {
+  isTenantEntity<T extends MyBaseEntity>(entity: T | EntityTarget<T>): boolean {
     if (entity instanceof TenantScopedEntity) {
-      if (this.context.hasTenant && entity.tenantId !== this.context.tenantId) {
+      if (TenantContext.instance.id !== entity.tenantId) {
         throw new HttpsError(
           "internal",
           `This entity not under current context`,
-          { context: this.context.tenantId, entity }
+          { context: TenantContext.instance.id, entity }
         );
       }
       return true;
@@ -77,7 +65,7 @@ export class TypeORMTenantScopedTx extends TypeORMTx<TenantContext> {
    * @param where もととなるwhere
    * @returns 必要に応じて現行コンテキストのtenantIdが追加されたwhere
    */
-  completeTenantWhere<T extends MyBaseEntity<any>>(
+  completeTenantWhere<T extends MyBaseEntity>(
     entityClass: EntityTarget<T>,
     where:
       | string
@@ -95,9 +83,11 @@ export class TypeORMTenantScopedTx extends TypeORMTx<TenantContext> {
 
     if (typeof where === "string") {
       // 単発IDによるwhereにもtenantIdを付与する
-      const col = getRepository(entityClass).metadata.columns.find(
-        (col) => col.propertyName !== "tenantId" && col.isPrimary
-      );
+      const col = this.tx
+        .getRepository(entityClass)
+        .metadata.columns.find(
+          (col) => col.propertyName !== "tenantId" && col.isPrimary
+        );
       if (col == null) {
         throw new HttpsError(
           "internal",
@@ -107,20 +97,20 @@ export class TypeORMTenantScopedTx extends TypeORMTx<TenantContext> {
       }
       return {
         [col.propertyName]: where,
-        tenantId: this.context.tenantId,
+        tenantId: TenantContext.instance.id,
       } as any;
     }
 
     if (Array.isArray(where)) {
       return where.map((e) => ({
         ...e,
-        tenantId: this.context.tenantId,
+        tenantId: TenantContext.instance.id,
       }));
     }
 
     return {
       ...(where as any),
-      tenantId: this.context.tenantId,
+      tenantId: TenantContext.instance.id,
     };
   }
 
@@ -148,7 +138,7 @@ export class TypeORMTenantScopedTx extends TypeORMTx<TenantContext> {
   /**
    * where 句に tenantId: this.tenantId を付与します。
    */
-  find<T extends MyBaseEntity<any>>(
+  find<T extends MyBaseEntity>(
     entityClass: EntityTarget<T>,
     options?: FindManyOptions<Omit<T, "tenantId">>
   ): Promise<T[]> {
@@ -160,7 +150,7 @@ export class TypeORMTenantScopedTx extends TypeORMTx<TenantContext> {
   /**
    * where 句に tenantId: this.tenantId を付与します。
    */
-  findOne<T extends MyBaseEntity<any>>(
+  findOne<T extends MyBaseEntity>(
     entityClass: EntityTarget<T>,
     optionsOrId?: FindManyOptions<Omit<T, "tenantId">> | string
   ): Promise<T | undefined> {
@@ -175,7 +165,7 @@ export class TypeORMTenantScopedTx extends TypeORMTx<TenantContext> {
   /**
    * where 句に tenantId: this.tenantId を付与します。
    */
-  async findOneOrFail<T extends MyBaseEntity<any>>(
+  async findOneOrFail<T extends MyBaseEntity>(
     entityClass: EntityTarget<T>,
     optionsOrId: FindManyOptions<Omit<T, "tenantId">> | string
   ): Promise<T> {

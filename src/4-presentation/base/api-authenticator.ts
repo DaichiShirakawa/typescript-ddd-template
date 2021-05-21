@@ -1,22 +1,22 @@
 import { Request } from "express";
 import { Securities, Scopes } from "./securities";
-import { ConsoleSecurity } from "./console-security";
+import { APISecurity as APISecurity } from "./api-security";
 
 /**
  * 各 Route に到達する前に呼ばれます
  * Authentication middleware for tsoa @Security
  */
-export async function tsoaAuthentication(
+export async function expressAuthentication(
   req: Request,
   security: Securities,
   scopes: Scopes[] = []
 ) {
   switch (security) {
-    case Securities.CONSOLE:
-      return await ConsoleSecurity.verify(req, security, scopes);
+    case Securities.NONE:
+      return;
 
-    case Securities.MOBILE:
-      throw new Error(`Securities.APP not implemented`);
+    case Securities.API:
+      return await APISecurity.verify(req, security, scopes);
 
     default:
       throw new Error(`Unknown security: ${security}`);

@@ -1,39 +1,23 @@
-import {
-  Body,
-  Controller,
-  Get,
-  Path,
-  Post,
-  Request,
-  Route,
-  Security,
-  Tags,
-} from "tsoa";
+import { Body, Controller, Get, Post, Route, Security, Tags } from "tsoa";
 import { Facility } from "../1-entities/facility.entity";
-import { FacilityService } from "../3-services/facility.service";
-import { TenantScopedReq } from "./base/console-security";
 import { Scopes, Securities } from "./base/securities";
 import { RegisterFacilityReq } from "./interfaces/facility.if";
+import { FacilityService } from "../3-services/facility.service";
 
-@Route("/tenants/:tenantId/facilities")
+@Route("/facilities")
 @Tags("02: Facility")
 export class FacilityAPI extends Controller {
   @Post("/")
-  @Security(Securities.CONSOLE, [Scopes.TENANT])
+  @Security(Securities.API, [Scopes.TENANT])
   async registerFacilityGMO(
-    @Request() req: TenantScopedReq,
-    @Path() tenantId: string,
     @Body() data: RegisterFacilityReq
   ): Promise<Facility> {
-    return await new FacilityService(req).register(data);
+    return await new FacilityService().register(data);
   }
 
-  @Get("/:tenantId/facilities")
-  @Security(Securities.CONSOLE, [Scopes.TENANT])
-  async listFacilities(
-    @Request() req: TenantScopedReq,
-    @Path() tenantId: string
-  ): Promise<Facility[]> {
-    return await new FacilityService(req).list();
+  @Get("/")
+  @Security(Securities.API, [Scopes.TENANT])
+  async listFacilities(): Promise<Facility[]> {
+    return await new FacilityService().list();
   }
 }

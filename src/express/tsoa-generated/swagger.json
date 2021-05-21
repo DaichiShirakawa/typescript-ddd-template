@@ -132,7 +132,7 @@
 	},
 	"openapi": "3.0.0",
 	"paths": {
-		"/tenants/{tenantId}/facilities": {
+		"/facilities": {
 			"post": {
 				"operationId": "RegisterFacilityGMO",
 				"responses": {
@@ -152,21 +152,12 @@
 				],
 				"security": [
 					{
-						"CONSOLE": [
+						"API": [
 							"TENANT"
 						]
 					}
 				],
-				"parameters": [
-					{
-						"in": "path",
-						"name": "tenantId",
-						"required": true,
-						"schema": {
-							"type": "string"
-						}
-					}
-				],
+				"parameters": [],
 				"requestBody": {
 					"required": true,
 					"content": {
@@ -177,9 +168,7 @@
 						}
 					}
 				}
-			}
-		},
-		"/tenants/{tenantId}/facilities/{tenantId}/facilities": {
+			},
 			"get": {
 				"operationId": "ListFacilities",
 				"responses": {
@@ -202,21 +191,92 @@
 				],
 				"security": [
 					{
-						"CONSOLE": [
+						"API": [
 							"TENANT"
 						]
+					}
+				],
+				"parameters": []
+			}
+		},
+		"/samples/get/{path}": {
+			"get": {
+				"operationId": "SampleGet",
+				"responses": {
+					"200": {
+						"description": "Ok",
+						"content": {
+							"application/json": {
+								"schema": {
+									"type": "string"
+								}
+							}
+						}
+					}
+				},
+				"tags": [
+					"99: Sample"
+				],
+				"security": [
+					{
+						"NONE": []
 					}
 				],
 				"parameters": [
 					{
 						"in": "path",
-						"name": "tenantId",
+						"name": "path",
 						"required": true,
 						"schema": {
 							"type": "string"
 						}
 					}
 				]
+			}
+		},
+		"/samples/error": {
+			"get": {
+				"operationId": "SampleError",
+				"responses": {
+					"204": {
+						"description": "No content"
+					}
+				},
+				"tags": [
+					"99: Sample"
+				],
+				"security": [
+					{
+						"NONE": []
+					}
+				],
+				"parameters": []
+			}
+		},
+		"/samples/busy": {
+			"get": {
+				"operationId": "SampleBusy",
+				"responses": {
+					"200": {
+						"description": "Ok",
+						"content": {
+							"application/json": {
+								"schema": {
+									"type": "string"
+								}
+							}
+						}
+					}
+				},
+				"tags": [
+					"99: Sample"
+				],
+				"security": [
+					{
+						"NONE": []
+					}
+				],
+				"parameters": []
 			}
 		},
 		"/tenants": {
@@ -234,16 +294,20 @@
 						}
 					}
 				},
+				"description": "新たな Tenant を登録します",
 				"tags": [
 					"01: Tenant"
 				],
 				"security": [
 					{
-						"CONSOLE": []
+						"API": [
+							"SUPER"
+						]
 					}
 				],
 				"parameters": [],
 				"requestBody": {
+					"description": "名前、コード",
 					"required": true,
 					"content": {
 						"application/json": {
@@ -276,7 +340,9 @@
 				],
 				"security": [
 					{
-						"CONSOLE": []
+						"API": [
+							"SUPER"
+						]
 					}
 				],
 				"parameters": []
@@ -302,8 +368,8 @@
 				],
 				"security": [
 					{
-						"CONSOLE": [
-							"TENANT"
+						"API": [
+							"SUPER"
 						]
 					}
 				],
@@ -339,7 +405,7 @@
 				],
 				"security": [
 					{
-						"CONSOLE": [
+						"API": [
 							"TENANT"
 						]
 					}
@@ -394,7 +460,7 @@
 				],
 				"security": [
 					{
-						"CONSOLE": [
+						"API": [
 							"TENANT"
 						]
 					}

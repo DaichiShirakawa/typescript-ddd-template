@@ -20,7 +20,7 @@ export class FacilityService extends TenantScopedService {
         );
       }
 
-      const tenantModel = new TenantModel(this);
+      const tenantModel = new TenantModel();
       const facilityModel = tenantModel.addFacility(init);
 
       return {

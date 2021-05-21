@@ -1,48 +1,23 @@
-import { TestBaseEntity } from "../../../1-entities/base/__test__/base-entity.test";
-import { TestTenantScopedEntity } from "../../../1-entities/base/__test__/tenant-scoped-entity.test";
-import { Tenant } from "../../../1-entities/tenant.entity";
+import { withContext } from "../../../0-base/context";
+import { TestBaseEntity } from "../../../1-entities/base/__test__/test-base-entity";
+import { TestTenantScopedEntity } from "../../../1-entities/base/__test__/test-tenant-scoped-entity";
+import { TestTenantScopedModel } from "./test-tenant-scoped-model";
 import { TenantContext } from "../tenant-context";
-import { TenantScopedModel } from "../tenant-scoped-model";
+import { TestTenantContext } from "./test-tenant-context";
 
-type D = {
-  be: TestBaseEntity;
-  tes: TestTenantScopedEntity[];
-};
+test("TenantScopedModel", () =>
+  withContext([TestTenantContext], () => {
+    const tenant = TenantContext.instance.tenant;
+    const be = new TestBaseEntity({ seq: 1 });
+    const tenantUnmatchedTe = new TestTenantScopedEntity(tenant.id, { seq: 2 });
+    Object.assign(tenantUnmatchedTe, { tenantId: "unknown" });
+    const m = new TestTenantScopedModel({ be, tes: [] });
 
-export class TestTenantScopedModel extends TenantScopedModel<D> implements D {
-  get id() {
-    return this.be.id;
-  }
+    expect(
+      () => new TestTenantScopedModel({ be, tes: [tenantUnmatchedTe] })
+    ).toThrow();
 
-  get be() {
-    return this.dependencies.be;
-  }
-
-  get tes() {
-    return this.dependencies.tes;
-  }
-
-  addTE(init: Pick<TestTenantScopedEntity, "seq">) {
-    this.add("tes", new TestTenantScopedEntity(this.tenantId, init));
-    return this;
-  }
-}
-
-test("TenantScopedModel", () => {
-  const tenant = new Tenant({ name: "Test Tenant", code: "test-tenant" });
-
-  const ch = { context: new TenantContext({ tenant }) };
-  const be = new TestBaseEntity({ seq: 1 });
-  const tenantUnmatchedTe = new TestTenantScopedEntity("dummy-tenant", {
-    seq: 2,
-  });
-  const m = new TestTenantScopedModel(ch, { be, tes: [] });
-
-  expect(
-    () => new TestTenantScopedModel(ch, { be, tes: [tenantUnmatchedTe] })
-  ).toThrow();
-
-  m.addTE({ seq: 3 });
-  expect(m.tes.length).toBe(1);
-  expect(m.tes[0].seq).toBe(3);
-});
+    m.addTE({ seq: 3 });
+    expect(m.tes.length).toBe(1);
+    expect(m.tes[0].seq).toBe(3);
+  }));

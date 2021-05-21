@@ -1,51 +1,43 @@
 import { EntityTarget, FindManyOptions } from "typeorm";
 import { MyBaseEntity } from "../../1-entities/base/base-entity";
-import { ContextHolder } from "../../0-base/context";
 import { TxProcessor, ReadonlyTxProcessor } from "./transaction";
-import {
-  SavedTarget,
-  SaveTarget,
-  Transaction,
-  TxStarters,
-} from "./transaction";
+import { SavedTarget, SaveTarget, Transaction } from "./transaction";
+import { logs } from "../../0-base/logs-context";
 
 export class DummyTx extends Transaction {
-  static async startTx<R>(ch: ContextHolder, func: TxProcessor<R>): Promise<R> {
-    console.log(`Start ${DummyTx.constructor.name}`);
-    const tx = new DummyTx(ch, false);
+  static async startTx<R>(func: TxProcessor<R>): Promise<R> {
+    logs().info(`Start ${DummyTx.constructor.name}`);
+    const tx = new DummyTx(false);
     const result = await func(tx);
     return result.returns ? result.returns() : (null as any);
   }
 
-  static async startReadonlyTx<R>(
-    ch: ContextHolder,
-    func: ReadonlyTxProcessor<R>
-  ): Promise<R> {
-    console.log(`Start READONLY ${DummyTx.constructor.name}`);
-    const tx = new DummyTx(ch, true);
+  static async startReadonlyTx<R>(func: ReadonlyTxProcessor<R>): Promise<R> {
+    logs().info(`Start READONLY ${DummyTx.constructor.name}`);
+    const tx = new DummyTx(true);
     const result = await func(tx);
     return result;
   }
 
-  insert<T extends MyBaseEntity<any>>(entity: T): Promise<T> {
+  insert<T extends MyBaseEntity>(entity: T): Promise<T> {
     throw new Error("Need set Transaction implementation to Service.TX_SET");
   }
-  update<T extends MyBaseEntity<any>>(entity: T): Promise<T> {
+  update<T extends MyBaseEntity>(entity: T): Promise<T> {
     throw new Error("Need set Transaction implementation to Service.TX_SET");
   }
-  find<T extends MyBaseEntity<any>>(
+  find<T extends MyBaseEntity>(
     entityClass: EntityTarget<T>,
     options?: FindManyOptions<Omit<T, "tenantId">>
   ): Promise<T[]> {
     throw new Error("Need set Transaction implementation to Service.TX_SET");
   }
-  findOne<T extends MyBaseEntity<any>>(
+  findOne<T extends MyBaseEntity>(
     entityClass: EntityTarget<T>,
     optionsOrId?: string | FindManyOptions<Omit<T, "tenantId">>
   ): Promise<T | undefined> {
     throw new Error("Need set Transaction implementation to Service.TX_SET");
   }
-  findOneOrFail<T extends MyBaseEntity<any>>(
+  findOneOrFail<T extends MyBaseEntity>(
     entityClass: EntityTarget<T>,
     optionsOrId: string | FindManyOptions<Omit<T, "tenantId">>
   ): Promise<T> {
@@ -55,8 +47,3 @@ export class DummyTx extends Transaction {
     throw new Error("Need set Transaction implementation to Service.TX_SET");
   }
 }
-
-export const DUMMY_TX_STARTERS: TxStarters = {
-  tx: DummyTx.startTx,
-  readonlyTx: DummyTx.startReadonlyTx,
-};

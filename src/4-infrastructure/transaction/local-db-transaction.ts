@@ -1,31 +1,33 @@
 import cloneDeep from "lodash/cloneDeep";
 import { EntityTarget, FindManyOptions } from "typeorm";
-import { Context, ContextHolder } from "../../../0-base/context";
-import { HttpsError } from "../../../0-base/https-error";
-import { MyBaseEntity } from "../../../1-entities/base/base-entity";
-import { ReadonlyTxProcessor, Transaction, TxProcessor } from "../transaction";
+import { HttpsError } from "../../0-base/https-error";
+import { MyBaseEntity } from "../../1-entities/base/base-entity";
+import { logs } from "../../0-base/logs-context";
+import {
+  ReadonlyTxProcessor,
+  Transaction,
+  TxProcessor,
+} from "../../3-services/base/transaction";
 
 let DB: { [entityName: string]: MyBaseEntity[] } = {};
 
-export class LocalDBTransaction<
-  C extends Context = Context
-> extends Transaction<C> {
+export class LocalDBTx extends Transaction {
   /**
    * models 管理下にあるすべての entities を Save したあとに returns() の結果を返す
    */
-  static async startTx<R>(ch: ContextHolder, func: TxProcessor<R>): Promise<R> {
+  static async startTx<R>(func: TxProcessor<R>): Promise<R> {
     const backup = cloneDeep(DB);
     try {
-      console.log(`Start ${LocalDBTransaction.constructor.name}`);
+      logs().info(`Start ${LocalDBTx.name}`);
 
-      const tx = new LocalDBTransaction(ch, false);
-      const result = await super.startTx(ch, func, tx);
+      const tx = new LocalDBTx(false);
+      const result = await super.startTx(func, tx);
 
-      console.log(`Commit ${LocalDBTransaction.constructor.name}`);
+      logs().info(`Commit ${LocalDBTx.name}`);
 
       return result;
     } catch (e) {
-      console.log(`Rollback ${LocalDBTransaction.constructor.name}`);
+      logs().info(`Rollback ${LocalDBTx.name}`);
       DB = backup;
       throw e;
     }
@@ -34,18 +36,15 @@ export class LocalDBTransaction<
   /**
    * 保存系が封じられた Tx
    */
-  static async startReadonlyTx<R>(
-    ch: ContextHolder,
-    func: ReadonlyTxProcessor<R>
-  ): Promise<R> {
+  static async startReadonlyTx<R>(func: ReadonlyTxProcessor<R>): Promise<R> {
     try {
-      console.log(`Start READONLY ${LocalDBTransaction.constructor.name}`);
-      const tx = new LocalDBTransaction(ch, true);
-      return super.startReadonlyTx(ch, func, tx);
+      logs().info(`Start READONLY ${LocalDBTx.constructor.name}`);
+      const tx = new LocalDBTx(true);
+      return super.startReadonlyTx(func, tx);
     } catch (e) {
       throw e;
     } finally {
-      console.log(`Rollback READONLY ${LocalDBTransaction.constructor.name}`);
+      logs().info(`Rollback READONLY ${LocalDBTx.constructor.name}`);
     }
   }
 

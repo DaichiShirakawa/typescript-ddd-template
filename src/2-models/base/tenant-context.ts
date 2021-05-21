@@ -1,32 +1,32 @@
-import { Tenant } from "../../1-entities/tenant.entity";
+import { Context } from "../../0-base/context";
+import { ContextHolder } from "../../0-base/context-holder";
 import { HttpsError } from "../../0-base/https-error";
-import { Context, ContextHolder } from "../../0-base/context";
+import { Tenant } from "../../1-entities/tenant.entity";
 
 /**
  * 特定テナントに関する操作のコンテキスト
  */
-export class TenantContext extends Context<{ tenant?: Tenant }> {
-  public get hasTenant() {
-    return this.dataset.tenant != null;
+export class TenantContext extends Context {
+  constructor(private _tenant: Tenant) {
+    super();
   }
 
-  public get tenant(): Tenant {
-    if (this.dataset.tenant == null) {
-      throw new HttpsError("internal", `TenantContext.tenant not set`);
-    }
-    return this.dataset.tenant;
+  static get instance() {
+    return ContextHolder.get(TenantContext);
   }
 
-  public set tenant(tenant: Tenant) {
-    if (this.dataset.tenant != null && this.dataset.tenant.id !== tenant.id) {
+  get tenant() {
+    return this._tenant;
+  }
+
+  set tenant(tenant: Tenant) {
+    if (this.tenant.id !== tenant.id) {
       throw new HttpsError("internal", `TenantContext.tenant.id not matched`);
     }
-    this.dataset.tenant = tenant;
+    this._tenant = tenant;
   }
 
-  public get tenantId(): string {
+  get id(): string {
     return this.tenant.tenantId;
   }
 }
-
-export type TenantContextHolder = ContextHolder<TenantContext>;

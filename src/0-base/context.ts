@@ -1,72 +1,42 @@
-import { HttpsError } from "./https-error";
+import { ContextHolder } from "./context-holder";
 
 /**
- * 以下を表現する構造体
+ * どういった文脈でプログラムが実行されているか (dataset) を保持する構造体
+ * Context のインスタンスは ContextHolder が保持する
  *
- * 1. どういった文脈でプログラムが実行されているか (dataset)
- *    (例) 特定のユーザーとして認証され、特定のテナントに属しているデータの操作のみを認可されている
- *
- * 2. その文脈の根拠となる文脈 (source)
- *    (例): その根拠は特定の HTTP リクエストである
+ * (例)
+ * - 特定のユーザーとして認証され、特定のテナントに属しているデータの操作のみを認可されている
+ * - 特定の HTTP リクエストから実行された操作である
  */
-export abstract class Context<DATASET = {}> implements ContextHolder {
-  protected readonly dataset: DATASET;
-  private readonly _source?: Context;
-
-  constructor(dataset: DATASET & { source?: ContextHolder }) {
-    this._source = dataset.source?.context;
-    this.dataset = { ...dataset };
-    delete (this.dataset as any).source;
+export abstract class Context {
+  static get instance(): Context {
+    throw new Error(`Need override`);
   }
 
-  get context() {
-    return this;
-  }
-
-  public get hasSource() {
-    return this._source != null;
-  }
-
-  public get source(): Context<any> {
-    if (this._source == null) {
-      throw new HttpsError("internal", `No source context`);
+  static get hasInstance(): boolean {
+    try {
+      this.instance;
+      return true;
+    } catch (ignored) {
+      return false;
     }
-    return this._source;
-  }
-
-  /**
-   * 自分またはsourceをさかのぼって目的のContextを見つける
-   *
-   * @param contextClass 要求するContext
-   * @returns 見つからなければ null
-   */
-  public pick<C extends Context>(
-    contextClass: new (...args: any[]) => C
-  ): C | null {
-    for (
-      let cursor: Context | undefined = this;
-      cursor != null;
-      cursor = cursor._source
-    ) {
-      if (cursor.constructor.name === contextClass.name) {
-        return cursor as C;
-      }
-    }
-    return null;
-  }
-
-  /**
-   * 自分またはsourceをさかのぼって目的のContextを保有しているかを調べる
-   *
-   * @param contextClass 要求するContext
-   */
-  public has<C extends Context>(
-    contextClass: new (...args: any[]) => C
-  ): boolean {
-    return this.pick(contextClass) != null;
   }
 }
 
-export type ContextHolder<C extends Context = any> = {
-  context: C;
-};
+/**
+ * func() を ContextHolder.session で囲んで実行します。
+ * func() 内部からは統一した Context が参照できます。
+ *
+ * @param func 実行したいアプリケーションの実態
+ */
+export async function withContext(contexts: any[], func: () => any) {
+  try {
+    ContextHolder.startSession();
+    for (const context of contexts) {
+      ContextHolder.set(context);
+    }
+    return await func();
+  } finally {
+    ContextHolder.endSession();
+  }
+}

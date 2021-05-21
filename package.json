@@ -1,7 +1,7 @@
 {
   "name": "typescript-ddd-template",
   "version": "0.1.0",
-  "description": "ドメイン駆動ベースのサーバーサイドフレーム",
+  "description": "ドメイン駆動ベースのサーバーサイドテンプレート",
   "author": "Daichi Shirakawa",
   "license": "MIT",
   "engines": {
@@ -17,16 +17,16 @@
     "validate-layers": "ts-node tools/ddd-layers-validator.ts",
     "test": "jest /select/your/test --watch --maxWorkers=50%",
     "test:debug": "node --inspect=9229 $(npm bin)/jest /select/your/test --runInBand --watch",
-    "serve": "npx @google-cloud/functions-framework --target=api",
-    "start": "tsc-watch --onSuccess 'npm run serve'",
-    "serve:debug": "node --inspect=9229 node_modules/@google-cloud/functions-framework --target=api",
-    "debug": "tsc-watch --onSuccess 'npm run serve:debug'"
+    "start": "tsc-watch --onFirstSuccess 'nodemon --watch src/ --ext ts --exec \"npx @google-cloud/functions-framework --target=api\"'",
+    "debug": "tsc-watch --onFirstSuccess 'nodemon --watch src/ --ext ts --exec \"node --inspect=9229 node_modules/@google-cloud/functions-framework --target=api\"'"
   },
   "dependencies": {
+    "@google-cloud/logging": "^9.2.3",
     "cors": "^2.8.5",
     "dotenv-flow": "^3.2.0",
     "express": "^4.17.1",
     "lodash": "^4.17.21",
+    "log4js": "^6.3.0",
     "luxon": "^1.26.0",
     "mysql": "^2.18.1",
     "reflect-metadata": "^0.1.13",
@@ -41,6 +41,7 @@
     "@types/express": "^4.17.11",
     "@types/jest": "^26.0.22",
     "@types/lodash": "^4.14.168",
+    "@types/log4js": "^2.3.5",
     "@types/luxon": "^1.26.4",
     "@types/node": "^15.0.3",
     "@types/swagger-ui-express": "^4.1.2",

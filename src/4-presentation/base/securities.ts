@@ -1,15 +1,19 @@
 export enum Securities {
   /**
-   * 管理コンソール
+   * サンプルなどのノーガードAPI
    */
-  CONSOLE = "CONSOLE",
+  NONE = "NONE",
   /**
-   * モバイルアプリ
+   * Https API
    */
-  MOBILE = "MOBILE",
+  API = "API",
 }
 
 export enum Scopes {
+  /**
+   * システム管理者に限定されたスコープ
+   */
+  SUPER = "SUPER",
   /**
    * 特定の Tenant に限定された Scope
    */

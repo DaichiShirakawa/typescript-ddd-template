@@ -1,6 +1,6 @@
-import { TenantContextHolder } from "./base/tenant-context";
 import { Facility } from "../1-entities/facility.entity";
 import { TenantScopedModel } from "./base/tenant-scoped-model";
+import { TenantContext } from "./base/tenant-context";
 
 type D = { facility: Facility };
 
@@ -10,8 +10,8 @@ type D = { facility: Facility };
 export class FacilityModel extends TenantScopedModel<D> {
   static FACILITY_NAME = /^[A-z]{1}[A-z0-9\-_]{0,31}[A-z0-9]{1}$/;
 
-  constructor(ch: TenantContextHolder, dependencies: D) {
-    super(ch, { ...dependencies });
+  constructor(dependencies: D) {
+    super({ ...dependencies });
   }
 
   get id() {
@@ -22,9 +22,9 @@ export class FacilityModel extends TenantScopedModel<D> {
     return this.dependencies.facility;
   }
 
-  static register(ch: TenantContextHolder, init: Partial<Facility>) {
-    const facility = new Facility(ch.context.tenantId, init);
-    return new FacilityModel(ch, { facility });
+  static register(init: Partial<Facility>) {
+    const facility = new Facility(TenantContext.instance.id, init);
+    return new FacilityModel({ facility });
   }
 
   updateFacilityName(name: string) {

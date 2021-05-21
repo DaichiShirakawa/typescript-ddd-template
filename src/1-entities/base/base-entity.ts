@@ -52,8 +52,6 @@ export abstract class MyBaseEntity<SELF extends MyBaseEntity = any> {
    * @returns 自身の clone に changes の内容をかぶせたインスタンス
    */
   public set(changes: Partial<SELF>): SELF {
-    changes = { ...changes };
-
     for (const key in changes) {
       if ((changes as any)[key] === undefined) delete (changes as any)[key];
     }
