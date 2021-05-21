@@ -81,7 +81,7 @@ const config: Log4js.Configuration = {
     },
     testFile: {
       type: "dateFile",
-      filename: "logs/test.log",
+      filename: "log/test.log",
       pattern: "yyyy-MM-dd",
       alwaysIncludePattern: false,
       keepFileExt: true,
@@ -92,7 +92,7 @@ const config: Log4js.Configuration = {
     },
     file: {
       type: "dateFile",
-      filename: "logs/server.log",
+      filename: "log/server.log",
       pattern: "yyyy-MM-dd",
       alwaysIncludePattern: false,
       keepFileExt: true,
