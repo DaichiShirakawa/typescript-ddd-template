@@ -4,7 +4,9 @@
   "debug.javascript.autoAttachFilter": "onlyWithFlag",
   "editor.formatOnSave": true,
   "cSpell.words": [
+    "CLOUDSQL",
     "Middlewares",
+    "appenders",
     "gannma",
     "luxon",
     "protos",

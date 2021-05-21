@@ -1,17 +1,12 @@
 import { Request } from "express";
 import { Context } from "../../0-base/context";
 import { ContextHolder } from "../../0-base/context-holder";
-import { Securities } from "./securities";
 
 /**
  * 1 APIリクエストの中で不変なインスタンス
  */
 export class APIContext extends Context {
-  constructor(
-    readonly req: Request,
-    readonly security: Securities,
-    readonly scopes: string[]
-  ) {
+  constructor(readonly req: Request) {
     super();
   }
 
@@ -24,7 +19,7 @@ export class APIContext extends Context {
       executeId: this.req.get("function-execution-id") || "-",
       method: this.req.method,
       path: this.req.route.path,
-      rawUrl: this.req.route.url,
+      rawUrl: this.req.originalUrl,
       pathVariables: this.req.params,
       query: this.req.query as any,
     };

@@ -9,6 +9,7 @@ const r = DotEnv.config({ path: "./.env", silent: true });
 export const Env: {
   NODE_ENV: string;
   GOOGLE_APPLICATION_CREDENTIALS: string;
+  CLOUDSQL_CONNECTION_NAME: string;
 } = process.env as any;
 
 logs().info(`[DotEnv] read`);

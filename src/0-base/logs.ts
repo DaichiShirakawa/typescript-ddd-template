@@ -17,42 +17,55 @@ export class BaseLogs {
     this.logger = Log4js.getLogger(Env.NODE_ENV);
   }
 
-  trace(message: string, detail?: any) {
+  trace(message: string, detail?: any, labels: any = {}) {
     if (detail) this.logger.trace(message, detail);
     else this.logger.trace(message);
-    this.write(Levels.TRACE, message, detail);
+    this.write(Levels.TRACE, message, detail, labels);
   }
 
-  debug(message: string, detail?: any) {
+  debug(message: string, detail?: any, labels: any = {}) {
     if (detail) this.logger.debug(message, detail);
     else this.logger.debug(message);
-    this.write(Levels.DEBUG, message, detail);
+    this.write(Levels.DEBUG, message, detail, labels);
   }
 
-  info(message: string, detail?: any) {
+  info(message: string, detail?: any, labels: any = {}) {
     if (detail) this.logger.info(message, detail);
     else this.logger.info(message);
-    this.write(Levels.INFO, message, detail);
+    this.write(Levels.INFO, message, detail, labels);
   }
 
-  warn(message: string, detail?: any) {
+  warn(message: string, detail?: any, labels: any = {}) {
     if (detail) this.logger.warn(message, detail);
     else this.logger.warn(message);
-    this.write(Levels.WARN, message, detail);
+    this.write(Levels.WARN, message, detail, labels);
   }
 
-  error(message: string, detail?: any) {
+  error(message: string, detail?: any, labels: any = {}) {
     if (detail) this.logger.error(message, detail);
     else this.logger.error(message);
-    this.write(Levels.ERROR, message, detail);
+    this.write(Levels.ERROR, message, detail, labels);
   }
 
-  fatal(message: string, detail?: any) {
-    this.logger.fatal(message, detail);
-    this.write(Levels.FATAL, message, detail);
+  fatal(message: string, detail?: any, labels: any = {}) {
+    if (detail) this.logger.fatal(message, detail);
+    else this.logger.fatal(message);
+    this.write(Levels.FATAL, message, detail, labels);
   }
 
-  write(level: Levels, message: string, detail?: any) {
+  /**
+   *
+   * @param level
+   * @param message
+   * @param detail
+   * @param labels Cloud Logging などでラベルを追加したい場合
+   */
+  protected write(
+    level: Levels,
+    message: string,
+    detail?: any,
+    labels: any = {}
+  ) {
     // Override if need something to do
   }
 }

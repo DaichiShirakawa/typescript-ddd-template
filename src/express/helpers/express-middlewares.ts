@@ -1,13 +1,15 @@
 import { NextFunction, Request, Response } from "express";
 import { ValidateError } from "tsoa";
+import { ContextHolder } from "../../0-base/context-holder";
 import { HttpsError } from "../../0-base/https-error";
+import { logs } from "../../0-base/logs-context";
 import { MyBaseEntity } from "../../1-entities/base/base-entity";
 import { EntityHelper } from "../../1-entities/base/entity-helper";
-import { logs } from "../../0-base/logs-context";
+import { APIContext } from "../../4-presentation/base/api-context";
 
 export class APIMiddlewares {
   static requestLogger(req: Request, res: Response, next: NextFunction) {
-    logs().info(`[API 🔶] ${req.method.toUpperCase()} ${req.path}`);
+    // この時点ではまだ path 等が詰まっていないため、 api-authenticator の中で出力する
     next();
   }
 
@@ -44,10 +46,16 @@ export class APIMiddlewares {
       return;
     }
 
-    logs().info(`[API 🔵] ${req.method.toUpperCase()} ${req.path} SUCCEED`, [
-      res.statusCode,
-      res.statusMessage,
-    ]);
+    const api = ContextHolder.getOrNull(APIContext);
+    logs().info(
+      `[API 🔵] ${req.method.toUpperCase()} ${req.path} SUCCEED`,
+      [req.res?.statusCode, req.res?.statusMessage],
+      {
+        method: api?.requestInfo.method || "",
+        path: api?.requestInfo.path || "",
+      }
+    );
+
     next();
   }
 
@@ -57,38 +65,42 @@ export class APIMiddlewares {
     res: Response,
     next: NextFunction
   ) {
+    let message = "";
+    let details: any = undefined;
+
     if (err.constructor.name === HttpsError.name) {
       const httpsError = err as HttpsError;
-      logs().error(
-        `[API ❌] ${req.method.toUpperCase()} ${req.path} FAILED(HttpsError)`,
-        [httpsError.code, httpsError.message, httpsError.details]
-      );
+
+      message = `[API ❌] ${req.method.toUpperCase()} ${
+        req.path
+      } FAILED(HttpsError)`;
+      details = [httpsError.code, httpsError.message, httpsError.details];
+
       res.status(httpsError.httpErrorCode.status).send({
         status: httpsError.httpErrorCode.canonicalName,
         msg: httpsError.message,
       });
-      return;
-    }
-
-    if (err.constructor.name === ValidateError.name) {
+    } else if (err.constructor.name === ValidateError.name) {
       const ve: ValidateError = err as any;
-      logs().error(
-        `[API ❌] ${req.method.toUpperCase()} ${
-          req.path
-        } FAILED(ValidateError)`,
-        ve
-      );
+      message = `[API ❌] ${req.method.toUpperCase()} ${
+        req.path
+      } FAILED(ValidateError)`;
+      details = ve;
       res.status(ve.status).json(ve);
-      return;
+    } else {
+      message = `[API ❌] ${req.method.toUpperCase()} ${
+        req.path
+      } FAILED(UnexpectedError, ${err?.constructor || typeof err})`;
+      details = err;
+      res.status(500).send({ status: "INTERNAL_SERVER_ERROR" });
     }
 
-    logs().error(
-      `[API ❌] ${req.method.toUpperCase()} ${
-        req.path
-      } FAILED(UnexpectedError, ${err?.constructor || typeof err})`,
-      err
-    );
-    res.status(500).send({ status: "INTERNAL_SERVER_ERROR" });
-    return;
+    const api = ContextHolder.getOrNull(APIContext);
+    logs().error(message, details, {
+      method: api?.requestInfo.method || "",
+      path: api?.requestInfo.path || "",
+    });
+
+    next(err);
   }
 }

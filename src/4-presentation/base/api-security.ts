@@ -4,13 +4,10 @@ import { ContextHolder } from "../../0-base/context-holder";
 import { Tenant } from "../../1-entities/tenant.entity";
 import { TenantContext } from "../../2-models/base/tenant-context";
 import { SuperContext } from "../../3-services/base/super-context";
-import { APIContext } from "./api-context";
-import { Scopes, Securities } from "./securities";
+import { Scopes } from "./securities";
 
 export class APISecurity {
-  static async verify(req: Request, security: Securities, scopes: Scopes[]) {
-    ContextHolder.set(new APIContext(req, security, scopes));
-
+  static async verify(req: Request, scopes: Scopes[]) {
     if (scopes.includes(Scopes.SUPER)) {
       await APISecurity.super(req);
     }
