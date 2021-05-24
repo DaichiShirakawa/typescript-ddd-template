@@ -1,25 +1,20 @@
 import { execSync } from "child_process";
-import DotEnv from "dotenv-flow";
+import { toolsEnvLoad } from "./tools-env-loader";
 
 /**
  * .env/.env.{stage}-deploy.local を Functions 環境変数へ変換してデプロイします
  * .env/* はデプロイ内容に含まれません
  */
 
-const stage = process.env.NODE_ENV || "development";
-const envFile = `./.env/.env.${stage}-deploy.local`;
-const readEnv = DotEnv.load(envFile).parsed || {};
+const env = toolsEnvLoad(".env.{stage}-deploy.local");
 
-console.debug(readEnv);
-console.debug(`${envFile} read.`);
-
-if (!readEnv.GCP_PROJECT_NAME) {
-  throw new Error(`GCP_PROJECT_NAME env required in ${envFile}`);
+if (!env.GCP_PROJECT_NAME) {
+  throw new Error(`GCP_PROJECT_NAME required`);
 }
 
 const deployEnvs: string[] = [];
 
-for (const [key, value] of Object.entries(readEnv)) {
+for (const [key, value] of Object.entries(env)) {
   if (!value) continue;
   deployEnvs.push(`${key}=${value}`);
 }
@@ -27,6 +22,7 @@ for (const [key, value] of Object.entries(readEnv)) {
 const command = [
   `gcloud functions deploy api`,
   `--set-env-vars ${deployEnvs.join(",")}`,
+  `--region ${env.GCP_REGION}`,
   `--runtime nodejs14`,
   `--trigger-http`,
   `--security-level=secure-always`,
@@ -37,7 +33,7 @@ const command = [
 execSync(
   [
     `set -x;`,
-    `gcloud config set project ${readEnv.GCP_PROJECT_NAME};`,
+    `gcloud config set project ${env.GCP_PROJECT_NAME};`,
     `${command};`,
   ].join(" "),
   { stdio: "inherit" }

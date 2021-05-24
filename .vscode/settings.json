@@ -8,8 +8,10 @@
     "Middlewares",
     "appenders",
     "gannma",
+    "gcloudignore",
     "luxon",
     "ormconfig",
+    "prettierrc",
     "protos",
     "tsoa",
     "typeorm"

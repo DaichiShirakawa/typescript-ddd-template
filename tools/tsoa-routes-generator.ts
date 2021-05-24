@@ -1,4 +1,5 @@
 import fs from "fs";
+import { toolsEnvLoad } from "./tools-env-loader";
 import {
   ExtendedRoutesConfig,
   ExtendedSpecConfig,
@@ -6,15 +7,30 @@ import {
   generateSpec,
 } from "tsoa";
 
+const env = toolsEnvLoad(".env.{stage}-deploy.local");
+
 (async () => {
   const outputDirectory = `src/express/tsoa-generated`;
-  const routesFileName = `express-routes.ts`;
+  const routesFileName = `api-routes.ts`;
 
   const entryFile = `src/functions.index.ts`;
   const controllerPathGlobs = [`src/**/*.api.ts`];
   const authenticationModule = `src/4-presentation/base/api-authenticator.ts`;
 
   const swaggerOpts: ExtendedSpecConfig = {
+    spec: {
+      specVersion: 3,
+      servers: [
+        {
+          url: "http://localhost:8080/v1",
+          description: "Local API",
+        },
+        {
+          url: `https://${env.GCP_REGION}-${env.GCP_PROJECT_NAME}.cloudfunctions.net/api/v1`,
+          description: "Deployed API",
+        },
+      ],
+    },
     schemes: ["http", "https"],
     host: "localhost:8080",
     basePath: "/v1",

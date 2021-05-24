@@ -498,7 +498,13 @@
 	},
 	"servers": [
 		{
-			"url": "http://localhost:8080/v1"
+			"url": "http://localhost:8080/v1",
+			"description": "Local API"
+		},
+		{
+			"url": "https://undefined-undefined.cloudfunctions.net/api/v1",
+			"description": "Deployed API"
 		}
-	]
+	],
+	"specVersion": 3
 }

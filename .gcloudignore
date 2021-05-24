@@ -10,10 +10,11 @@
 documents
 jest.config.js
 log
-node_modules
+!node_modules
 src
 tools
 tsconfig.json
 typeorm
 README.md
 .prettierrc
+.node-version
