@@ -15,10 +15,12 @@
     "tsoa": "ts-node tools/tsoa-routes-generator.ts",
     "generate-er": "ts-node tools/er-diagram-generator.ts",
     "validate-layers": "ts-node tools/ddd-layers-validator.ts",
+    "build": "npx tsc",
+    "deploy": "npm run build; ts-node tools/deploy-api.ts",
     "test": "jest /select/your/test --watch --maxWorkers=50%",
     "test:debug": "node --inspect=9229 $(npm bin)/jest /select/your/test --runInBand --watch",
-    "start": "tsc-watch --onFirstSuccess 'nodemon --watch src/ --ext ts --exec \"npx @google-cloud/functions-framework --target=api\"'",
-    "debug": "tsc-watch --onFirstSuccess 'nodemon --watch src/ --ext ts --exec \"node --inspect=9229 node_modules/@google-cloud/functions-framework --target=api\"'"
+    "start": "tsc-watch --onFirstSuccess 'nodemon --watch src/ --ext ts --exec \"export NODE_ENV=development; npx @google-cloud/functions-framework --target=api\"'",
+    "debug": "tsc-watch --onFirstSuccess 'nodemon --watch src/ --ext ts --exec \"export NODE_ENV=development; node --inspect=9229 node_modules/@google-cloud/functions-framework --target=api\"'"
   },
   "dependencies": {
     "@google-cloud/logging": "^9.2.3",
@@ -28,7 +30,7 @@
     "lodash": "^4.17.21",
     "log4js": "^6.3.0",
     "luxon": "^1.26.0",
-    "mysql": "^2.18.1",
+    "mysql2": "^2.2.5",
     "reflect-metadata": "^0.1.13",
     "swagger-ui-express": "^4.1.6",
     "tsoa": "^3.7.0",

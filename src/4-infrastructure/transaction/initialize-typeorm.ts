@@ -1,24 +1,19 @@
 import "reflect-metadata"; // required by TypeORM
-import { createConnection, getConnectionOptions } from "typeorm";
-import * as ENTITIES from "./entities-index";
+import { ConnectionOptions, createConnection, getConnection } from "typeorm";
 import { logs } from "../../0-base/logs-context";
+import * as ENTITIES from "./entities-index";
 
 export function initializeTypeORM() {
-  return promise;
+  try {
+    getConnection();
+  } catch (ignored) {
+    return promise;
+  }
 }
 
 const promise = new Promise<void>(async (resolve) => {
   try {
-    const opts = await getConnectionOptions();
-    const entities = Object.values(ENTITIES);
-    await createConnection({
-      ...opts,
-      // logging: Env.NODE_ENV === "test",
-      // optsのままだとうまく行かないので、indexを作ってそこにファイル単位で登録するようにした
-      entities: entities as any,
-      migrations: [], // migrationの中身もなぜか読まれてエラー出る
-      subscribers: [],
-    });
+    await createConnection(options());
     logs().debug(`DB Connection created`);
 
     resolve();
@@ -30,3 +25,14 @@ const promise = new Promise<void>(async (resolve) => {
     resolve();
   }
 });
+
+function options(): ConnectionOptions {
+  const entities = Object.values(ENTITIES) as any;
+  const result = { ...require("../../../ormconfig") };
+
+  result.entities = entities;
+  delete result.migrations;
+  delete result.subscribers;
+
+  return result;
+}

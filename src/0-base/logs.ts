@@ -70,50 +70,73 @@ export class BaseLogs {
   }
 }
 
-const config: Log4js.Configuration = {
-  appenders: {
-    console: {
-      type: "console",
-      layout: {
-        type: "pattern",
-        pattern: "%[[%-5.5p]%] - %m",
+let config: Log4js.Configuration;
+
+if (Env.RUN_ON_LOCAL != "true") {
+  config = {
+    appenders: {
+      console: {
+        type: "console",
+        layout: {
+          type: "pattern",
+          pattern: "[%-5.5p] - %m",
+        },
       },
     },
-    testFile: {
-      type: "dateFile",
-      filename: "log/test.log",
-      pattern: "yyyy-MM-dd",
-      alwaysIncludePattern: false,
-      keepFileExt: true,
-      layout: {
-        type: "pattern",
-        pattern: "[%d{yyyy-MM-dd hh:mm:ss} %-5.5p] - %m",
+    categories: {
+      default: {
+        appenders: ["console"],
+        level: "INFO",
+        enableCallStack: true,
       },
     },
-    file: {
-      type: "dateFile",
-      filename: "log/server.log",
-      pattern: "yyyy-MM-dd",
-      alwaysIncludePattern: false,
-      keepFileExt: true,
-      layout: {
-        type: "pattern",
-        pattern: "[%d{yyyy-MM-dd hh:mm:ss} %-5.5p] - %m",
+  };
+} else {
+  config = {
+    appenders: {
+      console: {
+        type: "console",
+        layout: {
+          type: "pattern",
+          pattern: "%[[%-5.5p]%] - %m",
+        },
+      },
+      testFile: {
+        type: "dateFile",
+        filename: "log/test.log",
+        pattern: "yyyy-MM-dd",
+        alwaysIncludePattern: false,
+        keepFileExt: true,
+        layout: {
+          type: "pattern",
+          pattern: "[%d{yyyy-MM-dd hh:mm:ss} %-5.5p] - %m",
+        },
+      },
+      file: {
+        type: "dateFile",
+        filename: "log/server.log",
+        pattern: "yyyy-MM-dd",
+        alwaysIncludePattern: false,
+        keepFileExt: true,
+        layout: {
+          type: "pattern",
+          pattern: "[%d{yyyy-MM-dd hh:mm:ss} %-5.5p] - %m",
+        },
       },
     },
-  },
-  categories: {
-    default: {
-      appenders: ["console", "file"],
-      level: "INFO",
-      enableCallStack: true,
+    categories: {
+      default: {
+        appenders: ["console", "file"],
+        level: "INFO",
+        enableCallStack: true,
+      },
+      test: {
+        appenders: ["console", "testFile"],
+        level: "ALL",
+        enableCallStack: true,
+      },
     },
-    test: {
-      appenders: ["console", "testFile"],
-      level: "ALL",
-      enableCallStack: true,
-    },
-  },
-};
+  };
+}
 
 Log4js.configure(config);

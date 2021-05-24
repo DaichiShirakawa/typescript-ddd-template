@@ -17,7 +17,7 @@ import {
   const swaggerOpts: ExtendedSpecConfig = {
     schemes: ["http", "https"],
     host: "localhost:8080",
-    basePath: "/api/v1",
+    basePath: "/v1",
     specVersion: 3,
     noImplicitAdditionalProperties: "throw-on-extras",
     entryFile,

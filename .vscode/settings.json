@@ -9,6 +9,7 @@
     "appenders",
     "gannma",
     "luxon",
+    "ormconfig",
     "protos",
     "tsoa",
     "typeorm"

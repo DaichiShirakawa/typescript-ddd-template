@@ -14,7 +14,7 @@ TypeScript でレイヤ間疎結合を意識したドメイン駆動開発して
 
 ## How to Serve
 
-- start 時 [Connect to DB](#connect-to-db) を満たしていないと error ログが出る
+- start 時 [Prepare Env](#prepare-env) を満たしていないと error ログが出る
   - CRUD が出来ないだけで動いている
 
 ```
@@ -26,6 +26,8 @@ npm run test
 npm run debug
 npm run test:debug
 ```
+
+access to `http://localhost:8080/docs/v1`
 
 ## 3rd-party Libraries
 
@@ -136,13 +138,24 @@ Presentation の定義をもとに `src/express/tsoa-generated`を自動生成
 
 [Layer-rules](#layer-rules) の違反を検出する
 
-## Connect to DB
+## Prepare Env
 
-- 3 つの SSL キーを `/typeorm/develop-keys` へ配置
-  - /typeorm/develop-keys/client-cert.pem
-  - /typeorm/develop-keys/client-key.pem
-  - /typeorm/develop-keys/server-ca.pem
-- `develop-keys` と言っているものの本番環境との接続情報の切り替え等はまだ想定してない(TODO)
+### ローカル
+
+- .env.development.local 等を生成
+  - .env の中身をコピーしてきて項目を埋める
+  - `GOOGLE_APPLICATION_CREDENTIALS` : Logging アクセス権原をもたせた ServiceAccount キーのパス
+  - ローカル DB アクセスのみなら `DB_CLOUDSQL_CONNECTION_NAME` は不要
+- 3 つの SSL キーを `/.env/develop-keys` へ配置
+  - /.env/develop-keys/client-cert.pem
+  - /.env/develop-keys/client-key.pem
+  - /.env/develop-keys/server-ca.pem
+
+### デプロイ
+
+- `.env.development-deploy.local` を生成
+  - `DB_CLOUDSQL_CONNECTION_NAME` を埋める
+  - デプロイの詳しい挙動は `tools/deploy-functions.ts` を参照
 
 ## DB Migrations
 

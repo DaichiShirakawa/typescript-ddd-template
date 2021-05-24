@@ -23,7 +23,7 @@ app.use(APIMiddlewares.requestLogger);
 app.use(APIMiddlewares.responseBodyFixer);
 
 app.use(
-  "/api-docs/v1",
+  "/docs/v1",
   SwaggerUI.serve,
   SwaggerUI.setup(swaggerJson, {
     swaggerOptions: { tagsSorter: "alpha" },
@@ -32,7 +32,7 @@ app.use(
 
 const router = express.Router();
 RegisterRoutes(router);
-app.use("/api/v1", router);
+app.use("/v1", router);
 
 app.use(APIMiddlewares.responseLogger);
 app.use(APIMiddlewares.errorHandler);

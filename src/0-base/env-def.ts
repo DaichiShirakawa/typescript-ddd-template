@@ -1,5 +1,4 @@
 import DotEnv from "dotenv-flow";
-import { logs } from "./logs-context";
 
 /**
  * jestでの実行時、なぜか.env*.localが読まれないので注意。
@@ -8,8 +7,16 @@ const r = DotEnv.config({ path: "./.env", silent: true });
 
 export const Env: {
   NODE_ENV: string;
+  RUN_ON_LOCAL: string;
+
   GOOGLE_APPLICATION_CREDENTIALS: string;
-  CLOUDSQL_CONNECTION_NAME: string;
+  DB_CLOUDSQL_CONNECTION_NAME: string;
+  DB_TYPE: string;
+  DB_HOST: string;
+  DB_PORT: string;
+  DB_USERNAME: string;
+  DB_PASSWORD: string;
+  DB_DATABASE: string;
 } = process.env as any;
 
-logs().info(`[DotEnv] read`);
+console.info(`[DotEnv] read`);
