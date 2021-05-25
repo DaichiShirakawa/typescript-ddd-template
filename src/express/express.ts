@@ -13,9 +13,7 @@ const app = express();
 
 app.use(async (req: Request, res: Response, next: NextFunction) => {
   await initializeTypeORM();
-  ContextHolder.startSession();
   ContextHolder.set(TransactionFactory.typeORMContext());
-  ContextHolder.set(LogsFactory.createContext());
   next();
 });
 app.use(cors({ allowedHeaders: ["x-tenant-id", "content-type"] }));
@@ -36,14 +34,5 @@ app.use("/v1", router);
 
 app.use(APIMiddlewares.responseLogger);
 app.use(APIMiddlewares.errorHandler);
-
-app.use((error: any, req: Request, res: Response, next: NextFunction) => {
-  ContextHolder.endSession();
-  next(error);
-});
-app.use((req: Request, res: Response, next: NextFunction) => {
-  ContextHolder.endSession();
-  next();
-});
 
 export const ExpressApp = app;

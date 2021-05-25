@@ -16,7 +16,7 @@
     "generate-er": "ts-node tools/er-diagram-generator.ts",
     "validate-layers": "ts-node tools/ddd-layers-validator.ts",
     "build": "npx tsc",
-    "deploy": "npm run build; ts-node tools/deploy-api.ts",
+    "deploy": "ts-node tools/deploy-api.ts",
     "test": "jest /select/your/test --watch --maxWorkers=50%",
     "test:debug": "node --inspect=9229 $(npm bin)/jest /select/your/test --runInBand --watch",
     "start": "tsc-watch --onFirstSuccess 'nodemon --watch src/ --ext ts --exec \"export NODE_ENV=development; npx @google-cloud/functions-framework --target=api\"'",

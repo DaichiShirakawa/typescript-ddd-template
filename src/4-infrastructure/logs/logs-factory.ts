@@ -7,7 +7,7 @@ export class LogsFactory {
   static createContext() {
     let logsClass = BaseLogs;
 
-    if (Env.GOOGLE_APPLICATION_CREDENTIALS) {
+    if (Env.RUN_ON_LOCAL != "true" || Env.GOOGLE_APPLICATION_CREDENTIALS) {
       logsClass = CloudLoggingLogs;
     }
 

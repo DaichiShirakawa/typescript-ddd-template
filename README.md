@@ -155,6 +155,7 @@ Presentation の定義をもとに `src/express/tsoa-generated`を自動生成
 
 - `.env.development-deploy.local` を生成
   - `DB_CLOUDSQL_CONNECTION_NAME` を埋める
+  - `npm run deploy -- api`
   - デプロイの詳しい挙動は `tools/deploy-functions.ts` を参照
 
 ## DB Migrations
