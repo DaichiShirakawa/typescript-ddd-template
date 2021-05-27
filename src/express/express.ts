@@ -1,22 +1,14 @@
 import cors from "cors";
-import express, { NextFunction, Request, Response } from "express";
+import express from "express";
 import SwaggerUI from "swagger-ui-express";
-import { ContextHolder } from "../0-base/context-holder";
-import { LogsFactory } from "../4-infrastructure/logs/logs-factory";
-import { initializeTypeORM } from "../4-infrastructure/transaction/initialize-typeorm";
-import { TransactionFactory } from "../4-infrastructure/transaction/transaction-factory";
 import { APIMiddlewares } from "./helpers/express-middlewares";
-import { RegisterRoutes } from "./tsoa-generated/express-routes";
+import { RegisterRoutes } from "./tsoa-generated/api-routes";
 import swaggerJson from "./tsoa-generated/swagger.json";
 
 const app = express();
 
-app.use(async (req: Request, res: Response, next: NextFunction) => {
-  await initializeTypeORM();
-  ContextHolder.set(TransactionFactory.typeORMContext());
-  next();
-});
 app.use(cors({ allowedHeaders: ["x-tenant-id", "content-type"] }));
+app.use(APIMiddlewares.appInitialize);
 app.use(APIMiddlewares.requestLogger);
 app.use(APIMiddlewares.responseBodyFixer);
 
@@ -34,5 +26,7 @@ app.use("/v1", router);
 
 app.use(APIMiddlewares.responseLogger);
 app.use(APIMiddlewares.errorHandler);
+app.use(APIMiddlewares.appFinalize);
+app.use(APIMiddlewares.appFinalizeError);
 
 export const ExpressApp = app;

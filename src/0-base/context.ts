@@ -29,13 +29,17 @@ export abstract class Context {
  *
  * @param func 実行したいアプリケーションの実態
  */
-export async function withContext(contexts: any[], func: () => any) {
+export async function withContext<T>(
+  contexts: any[],
+  func: () => Promise<T>
+): Promise<T> {
   try {
     ContextHolder.startSession();
     for (const context of contexts) {
       ContextHolder.set(context);
     }
-    return await func();
+    const res = await func();
+    return res;
   } finally {
     ContextHolder.endSession();
   }

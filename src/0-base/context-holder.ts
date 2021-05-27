@@ -37,15 +37,23 @@ export class ContextHolder {
     }
   }
 
-  static startSession(execId: string = v4()): Structure {
+  static startSession(execId?: string): Structure {
     this.enable();
     const cr: any = executionAsyncResource();
 
+    const parentStructure = cr[ContextHolder.PROP_NAME];
+
+    const base: BaseContext = new BaseContext(
+      executionAsyncId(),
+      execId || v4(),
+      parentStructure?.BaseContext
+    );
+
     const structure = (cr[ContextHolder.PROP_NAME] = {
-      BaseContext: new BaseContext(executionAsyncId(), execId),
-      parentStructure: cr[ContextHolder.PROP_NAME],
+      BaseContext: base,
+      parentStructure,
     });
-    console.debug(`[Context] Start Session ${structure.BaseContext.execId}`);
+    console.debug(`[Context] Start Session ${base.execId}-${base.seq}`);
     return structure;
   }
 
@@ -57,7 +65,9 @@ export class ContextHolder {
     }
     cr[ContextHolder.PROP_NAME] = structure.parentStructure;
 
-    console.debug(`[Context] End Session ${structure.asyncId}`);
+    console.debug(
+      `[Context] End Session ${structure.BaseContext.execId}-${structure.BaseContext.seq}`
+    );
     return structure;
   }
 
@@ -132,7 +142,25 @@ export class ContextHolder {
 }
 
 export class BaseContext {
-  constructor(readonly asyncId: number, readonly execId: string) {}
+  readonly root?: BaseContext;
+  private _rootNextSeq: number = -1;
+  readonly seq: number;
+
+  constructor(
+    readonly asyncId: number,
+    readonly execId: string,
+    source?: BaseContext
+  ) {
+    this.root = source?.root || source;
+
+    if (this.root == null) {
+      this.seq = 1;
+      this._rootNextSeq = 2;
+    } else {
+      this.seq = this.root._rootNextSeq++;
+      this.execId = this.root.execId;
+    }
+  }
 
   static get instance() {
     return ContextHolder.get(BaseContext);

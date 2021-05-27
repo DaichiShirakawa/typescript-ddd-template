@@ -9,9 +9,9 @@
   },
   "main": "dist/functions.index.js",
   "scripts": {
-    "migration:generate": "ts-node $(npm bin)/typeorm migration:generate -n sql; npm run export-er-diagram",
-    "migration:run": "ts-node $(npm bin)/typeorm migration:run",
-    "migration:revert": "ts-node $(npm bin)/typeorm migration:revert",
+    "migration:generate": "export NODE_ENV=development; ts-node $(npm bin)/typeorm migration:generate -n sql; npm run export-er-diagram",
+    "migration:run": "export NODE_ENV=development; ts-node $(npm bin)/typeorm migration:run",
+    "migration:revert": "export NODE_ENV=development; ts-node $(npm bin)/typeorm migration:revert",
     "tsoa": "ts-node tools/tsoa-routes-generator.ts",
     "generate-er": "ts-node tools/er-diagram-generator.ts",
     "validate-layers": "ts-node tools/ddd-layers-validator.ts",

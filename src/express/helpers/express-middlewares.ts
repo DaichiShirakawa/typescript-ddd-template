@@ -5,22 +5,64 @@ import { HttpsError } from "../../0-base/https-error";
 import { logs } from "../../0-base/logs-context";
 import { MyBaseEntity } from "../../1-entities/base/base-entity";
 import { EntityHelper } from "../../1-entities/base/entity-helper";
+import { LogsFactory } from "../../4-infrastructure/logs/logs-factory";
+import { initializeTypeORM } from "../../4-infrastructure/transaction/initialize-typeorm";
+import { TransactionFactory } from "../../4-infrastructure/transaction/transaction-factory";
 import { APIContext } from "../../4-presentation/base/api-context";
 
 export class APIMiddlewares {
-  static requestLogger(req: Request, res: Response, next: NextFunction) {
-    // この時点ではまだ path 等が詰まっていないため、 api-authenticator の中で出力する
+  static async appInitialize(req: Request, res: Response, next: NextFunction) {
+    try {
+      ContextHolder.startSession();
+      ContextHolder.set(LogsFactory.createContext());
+      await initializeTypeORM();
+      ContextHolder.set(TransactionFactory.typeORMContext());
+      next();
+    } catch (error) {
+      next(error);
+    }
+  }
+
+  static async appFinalize(req: Request, res: Response, next: NextFunction) {
+    ContextHolder.endSession();
     next();
   }
 
+  static async appFinalizeError(
+    error: Error,
+    req: Request,
+    res: Response,
+    next: NextFunction
+  ) {
+    try {
+      ContextHolder.endSession();
+      next();
+    } catch (error) {
+      next(error);
+    }
+  }
+
+  static requestLogger(req: Request, res: Response, next: NextFunction) {
+    try {
+      // この時点ではまだ path 等が詰まっていないため、 api-authenticator の中で出力する
+      next();
+    } catch (error) {
+      next(error);
+    }
+  }
+
   static responseBodyFixer(req: Request, res: Response, next: NextFunction) {
-    const oldJson = res.json.bind(res);
-    res.json = function (body?: any) {
-      body = APIMiddlewares.convertFrontEntityRecursively(body);
-      oldJson(body);
-      return res;
-    };
-    next();
+    try {
+      const oldJson = res.json.bind(res);
+      res.json = function (body?: any) {
+        body = APIMiddlewares.convertFrontEntityRecursively(body);
+        oldJson(body);
+        return res;
+      };
+      next();
+    } catch (error) {
+      next(error);
+    }
   }
 
   static convertFrontEntityRecursively(data: any): any {
