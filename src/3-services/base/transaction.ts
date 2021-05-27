@@ -86,7 +86,7 @@ export abstract class Transaction {
 
     targets = [...targets].sort(
       (a, b) =>
-        a.entity.instanceMeta.instanceSeq - b.entity.instanceMeta.instanceSeq
+        a.entity.instanceMeta.createSeq - b.entity.instanceMeta.createSeq
     );
 
     const savedTargets: SavedTarget[] = [];

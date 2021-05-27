@@ -2,8 +2,8 @@ import { Request } from "express";
 import { ContextHolder } from "../../0-base/context-holder";
 import { logs } from "../../0-base/logs-context";
 import { APIContext } from "./api-context";
-import { Scopes, Securities } from "./securities";
 import { APISecurity } from "./api-security";
+import { Scopes, Securities } from "./securities";
 
 /**
  * 各 Route に到達する前に呼ばれます
@@ -14,12 +14,7 @@ export async function expressAuthentication(
   security: Securities,
   scopes: Scopes[] = []
 ) {
-  const api = ContextHolder.set(new APIContext(req));
-
-  logs().info(`[API 🔶] ${req.method.toUpperCase()} ${req.path}`, undefined, {
-    method: api.requestInfo.method || "",
-    path: api.requestInfo.path || "",
-  });
+  start(req);
 
   switch (security) {
     case Securities.NONE:
@@ -31,4 +26,17 @@ export async function expressAuthentication(
     default:
       throw new Error(`Unknown security: ${security}`);
   }
+}
+
+/**
+ * 共通コンテキストの分析とロギング
+ * @param req
+ */
+function start(req: Request) {
+  const api = ContextHolder.set(new APIContext(req));
+
+  logs().info(`[API 🔶] ${req.method.toUpperCase()} ${req.path}`, undefined, {
+    method: api.requestInfo.method || "",
+    path: api.requestInfo.path || "",
+  });
 }

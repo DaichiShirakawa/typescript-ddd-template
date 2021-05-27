@@ -33,7 +33,7 @@ describe("ContextHolder", () => {
   });
 
   test("getOrNull", () => {
-    expect(() => ContextHolder.getOrNull(TestContext)).toThrow();
+    expect(() => ContextHolder.getOrNull(TestContext)).not.toThrow();
     ContextHolder.startSession();
 
     expect(ContextHolder.getOrNull(TestContext)).toBe(null);
@@ -56,7 +56,7 @@ describe("ContextHolder", () => {
   });
 
   test("has", () => {
-    expect(() => ContextHolder.has(TestContext)).toThrow();
+    expect(ContextHolder.has(TestContext)).toBeFalsy();
     ContextHolder.startSession();
 
     expect(ContextHolder.has(TestContext)).toBeFalsy();
@@ -67,7 +67,7 @@ describe("ContextHolder", () => {
   });
 
   test("assertEmpty", () => {
-    expect(() => ContextHolder.assertEmpty(TestContext)).toThrow();
+    expect(() => ContextHolder.assertEmpty(TestContext)).not.toThrow();
     ContextHolder.startSession();
 
     expect(() => ContextHolder.assertEmpty(TestContext)).not.toThrow();

@@ -14,7 +14,7 @@ export class APIMiddlewares {
   static async appInitialize(req: Request, res: Response, next: NextFunction) {
     try {
       ContextHolder.startSession();
-      ContextHolder.set(LogsFactory.createContext());
+      ContextHolder.set(LogsFactory.auto());
       await initializeTypeORM();
       ContextHolder.set(TransactionFactory.typeORMContext());
       next();

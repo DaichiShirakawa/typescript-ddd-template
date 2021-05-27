@@ -4,7 +4,7 @@ import { LogsContext, logs } from "../../0-base/logs-context";
 import { CloudLoggingLogs } from "./cloud-logging-logs";
 
 export class LogsFactory {
-  static createContext() {
+  static auto() {
     let logsClass = BaseLogs;
 
     if (Env.RUN_ON_LOCAL != "true" || Env.GOOGLE_APPLICATION_CREDENTIALS) {
@@ -19,5 +19,9 @@ export class LogsFactory {
       );
       return new LogsContext(new BaseLogs());
     }
+  }
+
+  static consoleOnly() {
+    return new LogsContext(new BaseLogs());
   }
 }

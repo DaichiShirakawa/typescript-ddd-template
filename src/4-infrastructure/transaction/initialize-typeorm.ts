@@ -3,28 +3,22 @@ import { ConnectionOptions, createConnection, getConnection } from "typeorm";
 import { logs } from "../../0-base/logs-context";
 import * as ENTITIES from "./entities-index";
 
-export function initializeTypeORM() {
+export async function initializeTypeORM() {
   try {
     getConnection();
   } catch (ignored) {
-    return promise;
+    await createConnection(options())
+      .then((r) => {
+        logs().debug(`DB Connection created`);
+      })
+      .catch((e) => {
+        logs().error(e);
+        logs().error(
+          `Failed to TypeORM.createConnection, using default Transaction`
+        );
+      });
   }
 }
-
-const promise = new Promise<void>(async (resolve) => {
-  try {
-    await createConnection(options());
-    logs().debug(`DB Connection created`);
-
-    resolve();
-  } catch (e) {
-    logs().error(e);
-    logs().error(
-      `Failed to TypeORM.createConnection, using default Transaction`
-    );
-    resolve();
-  }
-});
 
 function options(): ConnectionOptions {
   const entities = Object.values(ENTITIES) as any;

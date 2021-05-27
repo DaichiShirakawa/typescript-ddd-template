@@ -6,6 +6,7 @@ import cloneDeep from "lodash/cloneDeep";
  */
 export abstract class MyBaseEntity<SELF extends MyBaseEntity = any> {
   static CURRENT_INSTANCE_SEQ = 1;
+  static CURRENT_CREATE_SEQ = 1;
 
   private readonly _instanceMeta: EntityInstanceMeta<SELF>;
 
@@ -35,6 +36,7 @@ export abstract class MyBaseEntity<SELF extends MyBaseEntity = any> {
 
     this._instanceMeta = {
       instanceSeq: MyBaseEntity.CURRENT_INSTANCE_SEQ++,
+      createSeq: MyBaseEntity.CURRENT_CREATE_SEQ++,
       // TypeORM から生成の場合 init==null
       isNewEntity: init != null,
       updatedProps: new Set<keyof SELF>(),
@@ -61,6 +63,7 @@ export abstract class MyBaseEntity<SELF extends MyBaseEntity = any> {
       ...changes,
       _instanceMeta: {
         instanceSeq: MyBaseEntity.CURRENT_INSTANCE_SEQ++,
+        createSeq: clone.instanceMeta.createSeq,
         isNewEntity: this.instanceMeta.isNewEntity,
         updatedProps: new Set([
           ...clone._instanceMeta.updatedProps,
@@ -75,6 +78,7 @@ export abstract class MyBaseEntity<SELF extends MyBaseEntity = any> {
 
 type EntityInstanceMeta<SELF extends MyBaseEntity> = {
   instanceSeq: number;
+  createSeq: number;
   isNewEntity: boolean;
   updatedProps: ReadonlySet<keyof SELF>;
 };
